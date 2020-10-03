@@ -1,6 +1,7 @@
 import BufferList from 'bl';
 import {DECODER_STATE, PACKET_TYPE} from './enums';
-import {PacketConnack, PacketConnect, PacketSuback, PacketPublish} from './packet';
+import {PacketConnack, PacketSuback, PacketPublish} from './packet';
+import { PacketConnect } from './packets/connect';
 
 export class MqttDecoder {
   public state: DECODER_STATE = DECODER_STATE.HEADER;
