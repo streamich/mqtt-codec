@@ -246,3 +246,43 @@ describe('PUBREC', () => {
     });
   });
 });
+
+describe('PUBREL', () => {
+  it('parses MQTT 3.1.1 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(Buffer.from([
+      98, 2, // Header
+      0, 2 // Message ID
+    ]));
+    const packet: PacketPubrec = decoder.parse() as PacketPubrec;
+    expect(packet.b).toBe(98);
+    expect(packet.l).toBe(2);
+    expect(packet.i).toBe(2);
+    expect(packet.c).toBe(0);
+    expect(packet.p).toEqual({});
+  });
+
+  it('parses MQTT 5 properties', () => {
+    const decoder = new MqttDecoder();
+    decoder.version = 5;
+    decoder.push(Buffer.from([
+      98, 24, // Header
+      0, 2, // Message ID
+      16, // reason code
+      20, // properties length
+      31, 0, 4, 116, 101, 115, 116, // reasonString
+      38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116 // userProperties
+    ]));
+    const packet: PacketPubrec = decoder.parse() as PacketPubrec;
+    expect(packet.b).toBe(98);
+    expect(packet.l).toBe(24);
+    expect(packet.i).toBe(2);
+    expect(packet.c).toBe(16);
+    expect(packet.p).toEqual({
+      [PROPERTY.ReasonString]: 'test',
+      [PROPERTY.UserProperty]: [
+        ['test', 'test'],
+      ],
+    });
+  });
+});
