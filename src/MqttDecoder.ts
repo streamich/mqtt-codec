@@ -4,6 +4,7 @@ import {PacketConnack, parseConnack} from './packets/connack';
 import {PacketConnect, parseConnect} from './packets/connect';
 import {PacketPublish, parsePublish} from './packets/publish';
 import {PacketPuback, parsePuback} from './packets/puback';
+import {PacketPubrec, parsePubrec} from './packets/pubrec';
 
 export class MqttDecoder {
   public state: DECODER_STATE = DECODER_STATE.HEADER;
@@ -31,7 +32,7 @@ export class MqttDecoder {
     this.list = new BufferList();
   }
 
-  public parse(): null | PacketConnect | PacketConnack | PacketPublish | PacketPuback {
+  public parse(): null | PacketConnect | PacketConnack | PacketPublish | PacketPuback | PacketPubrec {
     this.parseFixedHeader();
     const data = this.parseVariableData();
     if (!data) return null;
@@ -55,6 +56,10 @@ export class MqttDecoder {
       }
       case PACKET_TYPE.PUBACK: {
         const packet = parsePuback(b, l, data, this.version);
+        return packet;
+      }
+      case PACKET_TYPE.PUBREC: {
+        const packet = parsePubrec(b, l, data, this.version);
         return packet;
       }
       default: {

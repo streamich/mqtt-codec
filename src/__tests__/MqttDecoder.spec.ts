@@ -5,6 +5,7 @@ import {PacketConnect} from '../packets/connect';
 import {PacketConnack} from '../packets/connack';
 import {PacketPublish} from '../packets/publish';
 import { PacketPuback } from '../packets/puback';
+import { PacketPubrec } from '../packets/pubrec';
 
 it('can instantiate', () => {
   const decoder = new MqttDecoder();
@@ -194,6 +195,46 @@ describe('PUBACK', () => {
     ]));
     const packet: PacketPuback = decoder.parse() as PacketPuback;
     expect(packet.b).toBe(64);
+    expect(packet.l).toBe(24);
+    expect(packet.i).toBe(2);
+    expect(packet.c).toBe(16);
+    expect(packet.p).toEqual({
+      [PROPERTY.ReasonString]: 'test',
+      [PROPERTY.UserProperty]: [
+        ['test', 'test'],
+      ],
+    });
+  });
+});
+
+describe('PUBREC', () => {
+  it('parses MQTT 3.1.1 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(Buffer.from([
+      80, 2, // Header
+      0, 2 // Message ID
+    ]));
+    const packet: PacketPubrec = decoder.parse() as PacketPubrec;
+    expect(packet.b).toBe(80);
+    expect(packet.l).toBe(2);
+    expect(packet.i).toBe(2);
+    expect(packet.c).toBe(0);
+    expect(packet.p).toEqual({});
+  });
+
+  it('parses MQTT 5 properties', () => {
+    const decoder = new MqttDecoder();
+    decoder.version = 5;
+    decoder.push(Buffer.from([
+      80, 24, // Header
+      0, 2, // Message ID
+      16, // reason code
+      20, // properties length
+      31, 0, 4, 116, 101, 115, 116, // reasonString
+      38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116 // userProperties
+    ]));
+    const packet: PacketPubrec = decoder.parse() as PacketPubrec;
+    expect(packet.b).toBe(80);
     expect(packet.l).toBe(24);
     expect(packet.i).toBe(2);
     expect(packet.c).toBe(16);
