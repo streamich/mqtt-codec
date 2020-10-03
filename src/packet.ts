@@ -1,20 +1,29 @@
 import {PACKET_TYPE} from './enums';
 
-export interface IPacket {
-  /** Packet type. */
-  t: PACKET_TYPE;
-  /** Fixed header flags. */
-  f: number;
+export interface MqttPacketHeaderData {
+  /** Packet first byte. */
+  b: number;
   /** Variable length. */
   l: number;
-  key: string | null;
-  dat: Buffer | null;
 }
 
-export class MqttPacket implements IPacket {
-  public t: PACKET_TYPE = PACKET_TYPE.RESERVED;
-  public f: number = 0;
+export class MqttPacket implements MqttPacketHeaderData {
+  public b: number = 0;
   public l: number = 0;
-  public key: string | null = null;
-  public dat: Buffer | null = null;
+
+  public type (): PACKET_TYPE {
+    return this.b >> 4;
+  }
+
+  public dup (): boolean {
+    return !!(this.b & 0b1000);
+  }
+
+  public qos (): 0 | 1 | 2 {
+    return ((this.b >> 1) & 0b11) as 0 | 1 | 2;
+  }
+
+  public retain (): boolean {
+    return !!(this.b & 0b1);
+  }
 }

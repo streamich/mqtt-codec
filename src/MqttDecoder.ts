@@ -2,15 +2,13 @@ import BufferList from 'bl';
 import {DECODER_STATE} from './enums';
 import {MqttPacket} from './packet';
 
-export type MqttDecoderOnPacket = (packet: any) => void;
-
 export class MqttDecoder {
-  public state: DECODER_STATE = DECODER_STATE.HEADER;
+  public state: DECODER_STATE = DECODER_STATE.BYTE;
   public error: null | Error = null;
   public list = new BufferList();
   public packet = new MqttPacket();
 
-  constructor (private readonly onPacket: MqttDecoderOnPacket) {}
+  constructor () {}
 
   public push (buf: Buffer) {
     this.list.append(buf);
@@ -21,34 +19,80 @@ export class MqttDecoder {
   }
 
   public reset () {
-    this.state = DECODER_STATE.HEADER;
-    this.error = null
+    this.state = DECODER_STATE.BYTE;
+    this.error = null;
     this.list = new BufferList();
     this.packet = new MqttPacket();
   }
 
-  public parse (buf: Buffer) {
-    if (this.error) this.reset();
+  public parse (): MqttPacket | null {
+    this.parseFixedHeader();
+    this.parseVariableData();
 
-    this.list.append(buf)
-
-    return this.parsePacket();
+    const packet = this.packet;
+    const isPacketEmpty = !packet.b;
+    const isParsingInProgress = this.state !== DECODER_STATE.BYTE;
+    if (isPacketEmpty || isParsingInProgress) return null;
+    this.packet = new MqttPacket();
+    return packet;
   }
 
-  public parsePacket () {
-    if (this.state === DECODER_STATE.HEADER) {
-      this.parseHeader();
-    }
+  public parseFixedHeader () {
+    this.parseFirstByte();
+    this.parseLength();
   }
 
-  public parseHeader () {
+  public parseFirstByte () {
+    if (this.state !== DECODER_STATE.BYTE) return;
     const list = this.list;
     if (!list.length) return;
-    const byte = list.readUInt8(0);
+    this.packet.b = list.readUInt8(0);
     list.consume(1);
-    this.state = DECODER_STATE.LENGTH;
-    const packet = this.packet;
-    packet.t = byte >> 4;
-    packet.f = byte & 0b1111;
+    this.state = DECODER_STATE.LEN;
+  }
+
+  public parseLength () {
+    if (this.state !== DECODER_STATE.LEN) return;
+    const int = this.consumeVarInt();
+    if (int < 0) return;
+    this.packet.l = int;
+    this.state = DECODER_STATE.DATA;
+  }
+
+  private consumeVarInt (): number {
+    const list = this.list;
+    const length = list.length;
+
+    if (length < 1) return -1;
+    const b1 = list.readUInt8(0);
+    if (b1 ^ 0b10000000) {
+      list.consume(1);
+      return b1 & 0b01111111;
+    }
+
+    if (length < 2) return -1;
+    const b2 = list.readUInt8(1);
+    if (b2 ^ 0b10000000) {
+      list.consume(2);
+      return ((b2 & 0b01111111) << 7 * 1) + (b1 & 0b01111111);
+    }
+
+    if (length < 3) return -1;
+    const b3 = list.readUInt8(2);
+    if (b3 ^ 0b10000000) {
+      list.consume(3);
+      return ((b3 & 0b01111111) << 7 * 2) + ((b2 & 0b01111111) << 7 * 1) + (b1 & 0b01111111);
+    }
+
+    if (length < 4) return -1;
+    const b4 = list.readUInt8(3);
+    list.consume(4);
+    return ((b4 & 0b01111111) << 7 * 3) + ((b3 & 0b01111111) << 7 * 2) + ((b2 & 0b01111111) << 7 * 1) + (b1 & 0b01111111);
+  }
+
+  public parseVariableData () {
+    if (this.state !== DECODER_STATE.DATA) return;
+
+    this.state = DECODER_STATE.BYTE;
   }
 }

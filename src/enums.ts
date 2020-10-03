@@ -1,7 +1,7 @@
 export const enum DECODER_STATE {
-  HEADER = 0,
-  LENGTH = 1,
-  PAYLOAD = 2,
+  BYTE = 0,
+  LEN = 1,
+  DATA = 2,
 }
 
 export const enum PACKET_TYPE {
