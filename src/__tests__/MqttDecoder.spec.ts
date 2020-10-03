@@ -4,6 +4,7 @@ import {PACKET_TYPE, PROPERTY} from '../enums';
 import {PacketConnect} from '../packets/connect';
 import {PacketConnack} from '../packets/connack';
 import {PacketPublish} from '../packets/publish';
+import { PacketPuback } from '../packets/puback';
 
 it('can instantiate', () => {
   const decoder = new MqttDecoder();
@@ -149,12 +150,58 @@ describe('PUBLISH', () => {
   });
 });
 
-// it('can parse SUBACK packet fixed header', () => {
-//   const decoder = new MqttDecoder();
-//   decoder.push(subscribeAck);
-//   const packet = decoder.parse();
-//   expect(packet!.type()).toBe(PACKET_TYPE.SUBACK);
-//   expect(packet!.dup()).toBe(false);
-//   expect(packet!.qos()).toBe(0);
-//   expect(packet!.retain()).toBe(false);
-// });
+describe('PUBACK', () => {
+  it('parses 3.1.1 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(Buffer.from([
+      64, 2, // Header
+      0, 2 // Message ID
+    ]));
+    const packet: PacketPuback = decoder.parse() as PacketPuback;
+    expect(packet.b).toBe(64);
+    expect(packet.l).toBe(2);
+    expect(packet.i).toBe(2);
+    expect(packet.c).toBe(0);
+    expect(packet.p).toEqual({});
+  });
+
+  it('with reason and no MQTT 5 properties', () => {
+    const decoder = new MqttDecoder();
+    decoder.version = 5;
+    decoder.push(Buffer.from([
+      64, 3, // Header
+      0, 2, // Message ID
+      16 // reason code
+    ]));
+    const packet: PacketPuback = decoder.parse() as PacketPuback;
+    expect(packet.b).toBe(64);
+    expect(packet.l).toBe(3);
+    expect(packet.i).toBe(2);
+    expect(packet.c).toBe(16);
+    expect(packet.p).toEqual({});
+  });
+
+  it('with MQTT 5 properties', () => {
+    const decoder = new MqttDecoder();
+    decoder.version = 5;
+    decoder.push(Buffer.from([
+      64, 24, // Header
+      0, 2, // Message ID
+      16, // reason code
+      20, // properties length
+      31, 0, 4, 116, 101, 115, 116, // reasonString
+      38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116 // userProperties
+    ]));
+    const packet: PacketPuback = decoder.parse() as PacketPuback;
+    expect(packet.b).toBe(64);
+    expect(packet.l).toBe(24);
+    expect(packet.i).toBe(2);
+    expect(packet.c).toBe(16);
+    expect(packet.p).toEqual({
+      [PROPERTY.ReasonString]: 'test',
+      [PROPERTY.UserProperty]: [
+        ['test', 'test'],
+      ],
+    });
+  });
+});

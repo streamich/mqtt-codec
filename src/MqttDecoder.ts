@@ -3,6 +3,7 @@ import {DECODER_STATE, PACKET_TYPE} from './enums';
 import {PacketConnack, parseConnack} from './packets/connack';
 import {PacketConnect, parseConnect} from './packets/connect';
 import {PacketPublish, parsePublish} from './packets/publish';
+import {PacketPuback, parsePuback} from './packets/puback';
 
 export class MqttDecoder {
   public state: DECODER_STATE = DECODER_STATE.HEADER;
@@ -30,7 +31,7 @@ export class MqttDecoder {
     this.list = new BufferList();
   }
 
-  public parse(): null | PacketConnect | PacketConnack | PacketPublish {
+  public parse(): null | PacketConnect | PacketConnack | PacketPublish | PacketPuback {
     this.parseFixedHeader();
     const data = this.parseVariableData();
     if (!data) return null;
@@ -50,6 +51,10 @@ export class MqttDecoder {
       }
       case PACKET_TYPE.PUBLISH: {
         const packet = parsePublish(b, l, data, this.version);
+        return packet;
+      }
+      case PACKET_TYPE.PUBACK: {
+        const packet = parsePuback(b, l, data, this.version);
         return packet;
       }
       default: {
