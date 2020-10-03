@@ -1,18 +1,15 @@
 import BufferList from 'bl';
 import {PACKET_TYPE} from './enums';
 
-export interface MqttPacketHeaderData {
+export interface PacketHeaderData {
   /** Packet first byte. */
   b: number;
   /** Variable length. */
   l: number;
 }
 
-export class MqttPacket implements MqttPacketHeaderData {
-  public b: number = 0;
-  public l: number = 0;
-
-  public data: BufferList | null = null;
+export class Packet implements PacketHeaderData {
+  constructor (public b: number, public l: number, public readonly data: BufferList | null = null) {}
 
   public type (): PACKET_TYPE {
     return this.b >> 4;
@@ -30,3 +27,28 @@ export class MqttPacket implements MqttPacketHeaderData {
     return !!(this.b & 0b1);
   }
 }
+
+export class PacketConnect extends Packet {
+  constructor (b: number, l: number, public readonly data: BufferList) {
+    super(b, l, data);
+  }
+}
+
+export class PacketConnack extends Packet {
+  constructor (b: number, l: number, public readonly data: BufferList) {
+    super(b, l, data);
+  }
+}
+
+export class PacketSuback extends Packet {
+  constructor (b: number, l: number, public readonly data: BufferList) {
+    super(b, l, data);
+  }
+}
+
+export class PacketPublish extends Packet {
+  constructor (b: number, l: number, public readonly data: BufferList) {
+    super(b, l, data);
+  }
+}
+
