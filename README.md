@@ -1,6 +1,6 @@
-# tpl-ts-lib
+# mqtt-codec
 
-Template for TypeScript libraries.
+MQTT packet encoder/decoder for Node.js.
 
 ## License
 
