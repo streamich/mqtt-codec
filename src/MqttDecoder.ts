@@ -33,7 +33,7 @@ export class MqttDecoder {
     const type: PACKET_TYPE = (b >> 4) as PACKET_TYPE;
     switch (type) {
       case PACKET_TYPE.CONNECT: {
-        const packet = new PacketConnect(b, l, data);
+        const packet = PacketConnect.parse(b, l, data);
         return packet;
       }
       case PACKET_TYPE.CONNACK: {
