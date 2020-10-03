@@ -10,7 +10,7 @@ export const parseVarInt = (list: BufferList, offset: number): [int: number, siz
   const b3 = list.readUInt8(offset + 2);
   if (b3 ^ 0b10000000) return [((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111), 3];
   const b4 = list.readUInt8(offset + 3);
-  return [((b4 & 0b01111111) << 21) + ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111), 4]
+  return [((b4 & 0b01111111) << 21) + ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111), 4];
 };
 
 export const parseBinary = (list: BufferList, offset: number): Buffer => {
@@ -34,59 +34,53 @@ export const parseProps = (list: BufferList, offset: number): [props: Properties
       case PROPERTY.RetainAvailable:
       case PROPERTY.WildcardSubscriptionAvailable:
       case PROPERTY.SubscriptionIdentifierAvailable:
-      case PROPERTY.SharedSubscriptionAvailable:
-        {
-          props[byte] = list.readUInt8(offset);
-          offset += 1;
-          break;
-        }
+      case PROPERTY.SharedSubscriptionAvailable: {
+        props[byte] = list.readUInt8(offset);
+        offset += 1;
+        break;
+      }
       case PROPERTY.ServerKeepAlive:
       case PROPERTY.ReceiveMaximum:
       case PROPERTY.TopicAliasMaximum:
-      case PROPERTY.TopicAlias:
-        {
-          props[byte] = list.readUInt16BE(offset);
-          offset += 2;
-          break;
-        }
+      case PROPERTY.TopicAlias: {
+        props[byte] = list.readUInt16BE(offset);
+        offset += 2;
+        break;
+      }
       case PROPERTY.MessageExpiryInterval:
       case PROPERTY.WillDelayInterval:
-      case PROPERTY.MaximumPacketSize:
-        {
-          props[byte] = list.readUInt32BE(offset);
-          offset += 4;
-          break;
-        }
+      case PROPERTY.MaximumPacketSize: {
+        props[byte] = list.readUInt32BE(offset);
+        offset += 4;
+        break;
+      }
       case PROPERTY.CorrelationData:
-      case PROPERTY.AuthenticationData:
-        {
-          const {byteLength} = props[byte] = parseBinary(list, offset);
-          offset += 2 + byteLength;
-          break;
-        }
+      case PROPERTY.AuthenticationData: {
+        const {byteLength} = (props[byte] = parseBinary(list, offset));
+        offset += 2 + byteLength;
+        break;
+      }
       case PROPERTY.ContentType:
       case PROPERTY.ResponseTopic:
       case PROPERTY.AssignedClientIdentifier:
       case PROPERTY.AuthenticationMethod:
       case PROPERTY.ResponseInformation:
       case PROPERTY.ServerReference:
-      case PROPERTY.ReasonString:
-        {
-          const binary = parseBinary(list, offset);
-          props[byte] = binary.toString('utf8');
-          offset += 2 + binary.byteLength;
-          break;
-        }
-      case PROPERTY.UserProperty:
-        {
-          if (props[PROPERTY.UserProperty]) props[PROPERTY.UserProperty] = [];
-          const key = parseBinary(list, offset);
-          offset += 2 + key.byteLength;
-          const value = parseBinary(list, offset);
-          offset += 2 + value.byteLength;
-          props[PROPERTY.UserProperty]!.push([key.toString('utf8'), value.toString('utf8')]);
-          break;
-        }
+      case PROPERTY.ReasonString: {
+        const binary = parseBinary(list, offset);
+        props[byte] = binary.toString('utf8');
+        offset += 2 + binary.byteLength;
+        break;
+      }
+      case PROPERTY.UserProperty: {
+        if (props[PROPERTY.UserProperty]) props[PROPERTY.UserProperty] = [];
+        const key = parseBinary(list, offset);
+        offset += 2 + key.byteLength;
+        const value = parseBinary(list, offset);
+        offset += 2 + value.byteLength;
+        props[PROPERTY.UserProperty]!.push([key.toString('utf8'), value.toString('utf8')]);
+        break;
+      }
       default:
         throw ERROR.MALFORMED_PACKET;
     }

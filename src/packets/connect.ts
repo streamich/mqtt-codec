@@ -27,7 +27,7 @@ export interface PacketConnectData extends PacketHeaderData {
 }
 
 export class PacketConnect extends Packet implements PacketConnectData {
-  static parse (b: number, l: number, data: BufferList): PacketConnect {
+  static parse(b: number, l: number, data: BufferList): PacketConnect {
     const v = data.readUInt8(6);
     const f = data.readUInt8(7);
     const k = data.readUInt16BE(8);
@@ -74,31 +74,39 @@ export class PacketConnect extends Packet implements PacketConnectData {
   public usr?: string;
   public pwd?: Buffer;
 
-  constructor (b: number, l: number, public v: number, public f: number, public k: number, public p: Properties, public id: string) {
+  constructor(
+    b: number,
+    l: number,
+    public v: number,
+    public f: number,
+    public k: number,
+    public p: Properties,
+    public id: string,
+  ) {
     super(b, l);
   }
 
-  public userNameFlag (): boolean {
+  public userNameFlag(): boolean {
     return !!(this.f & 0b10000000);
   }
 
-  public passwordFlag (): boolean {
+  public passwordFlag(): boolean {
     return !!(this.f & 0b01000000);
   }
 
-  public willRetain (): boolean {
+  public willRetain(): boolean {
     return !!(this.f & 0b00100000);
   }
 
-  public willQos (): QoS {
+  public willQos(): QoS {
     return ((this.f & 0b00011000) >> 3) as QoS;
   }
 
-  public willFlag (): boolean {
+  public willFlag(): boolean {
     return !!(this.f & 0b00000100);
   }
 
-  public cleanStart (): boolean {
+  public cleanStart(): boolean {
     return !!(this.f & 0b00000010);
   }
 }

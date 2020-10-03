@@ -1,7 +1,7 @@
 import {MqttDecoder} from '../MqttDecoder';
 import {connect, connectAck, connectWithClientId, publish1, subscribe, subscribeAck} from './util';
 import {PACKET_TYPE, PROPERTY} from '../enums';
-import { PacketConnect } from '../packets/connect';
+import {PacketConnect} from '../packets/connect';
 
 it('can instantiate', () => {
   const decoder = new MqttDecoder();
@@ -74,9 +74,10 @@ describe('CONNECT', () => {
     expect(packet.usr).toBe(undefined);
     expect(packet.pwd).toBe(undefined);
   });
-  
+
   it('parses strings', () => {
     const decoder = new MqttDecoder();
+    // prettier-ignore
     decoder.push(Buffer.from([
       16, 52, // Header
       0x00, 0x04, 0x4d, 0x51, 0x54, 0x54, // Protocol ID

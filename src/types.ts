@@ -1,4 +1,4 @@
-import { PROPERTY } from './enums';
+import {PROPERTY} from './enums';
 
 export type QoS = 0 | 1 | 2;
 

@@ -27,11 +27,11 @@ export const enum ERROR {
   PROTOCOL_ERROR = 0x82, // Protocol Error
   RECEIVE_MAX_EXCEEDED = 0x93, // Receive Maximum exceeded
   PACKET_TOO_LARGE = 0x95, // Packet too large
-  RETAIN_NOT_SUPPORTED = 0x9A, // Retain not supported
-  QOS_NOT_SUPPORTED = 0x9B, // QoS not supported
-  SHARED_SUB_NOT_SUPPORTED = 0x9E, // Shared Subscriptions not supported
-  SUB_IDS_NOT_SUPPORTED = 0xA1, // Subscription Identifiers not supported
-  WILDCARD_SUBS_NOT_SUPPORTED = 0xA2, // Wildcard Subscriptions not supported
+  RETAIN_NOT_SUPPORTED = 0x9a, // Retain not supported
+  QOS_NOT_SUPPORTED = 0x9b, // QoS not supported
+  SHARED_SUB_NOT_SUPPORTED = 0x9e, // Shared Subscriptions not supported
+  SUB_IDS_NOT_SUPPORTED = 0xa1, // Subscription Identifiers not supported
+  WILDCARD_SUBS_NOT_SUPPORTED = 0xa2, // Wildcard Subscriptions not supported
 }
 
 export const enum PROPERTY {
@@ -62,4 +62,4 @@ export const enum PROPERTY {
   WildcardSubscriptionAvailable = 40,
   SubscriptionIdentifierAvailable = 41,
   SharedSubscriptionAvailable = 42,
-};
+}

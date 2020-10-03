@@ -1,7 +1,7 @@
 import BufferList from 'bl';
 import {DECODER_STATE, PACKET_TYPE} from './enums';
 import {PacketConnack, PacketSuback, PacketPublish} from './packet';
-import { PacketConnect } from './packets/connect';
+import {PacketConnect} from './packets/connect';
 
 export class MqttDecoder {
   public state: DECODER_STATE = DECODER_STATE.HEADER;
@@ -10,23 +10,23 @@ export class MqttDecoder {
   public b: number = 0;
   public l: number = 0;
 
-  constructor () {}
+  constructor() {}
 
-  public push (buf: Buffer) {
+  public push(buf: Buffer) {
     this.list.append(buf);
   }
 
-  public bufferSize () {
+  public bufferSize() {
     return this.list.length;
   }
 
-  public reset () {
+  public reset() {
     this.state = DECODER_STATE.HEADER;
     this.error = null;
     this.list = new BufferList();
   }
 
-  public parse (): null | PacketConnect | PacketConnack | PacketSuback | PacketPublish {
+  public parse(): null | PacketConnect | PacketConnack | PacketSuback | PacketPublish {
     this.parseFixedHeader();
     const data = this.parseVariableData();
     if (!data) return null;
@@ -55,7 +55,7 @@ export class MqttDecoder {
     }
   }
 
-  public parseFixedHeader (): void {
+  public parseFixedHeader(): void {
     if (this.state !== DECODER_STATE.HEADER) return;
     const list = this.list;
     const length = list.length;
@@ -118,7 +118,7 @@ export class MqttDecoder {
   //   return ((b4 & 0b01111111) << 21) + ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
   // }
 
-  public parseVariableData (): null | BufferList {
+  public parseVariableData(): null | BufferList {
     if (this.state !== DECODER_STATE.DATA) return null;
     const {list, l: length} = this;
     if (list.length < length) return null;
