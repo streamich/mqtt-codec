@@ -1,3 +1,4 @@
+import BufferList from 'bl';
 import {PACKET_TYPE} from './enums';
 
 export interface MqttPacketHeaderData {
@@ -10,6 +11,8 @@ export interface MqttPacketHeaderData {
 export class MqttPacket implements MqttPacketHeaderData {
   public b: number = 0;
   public l: number = 0;
+
+  public data: BufferList | null = null;
 
   public type (): PACKET_TYPE {
     return this.b >> 4;

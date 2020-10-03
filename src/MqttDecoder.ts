@@ -28,7 +28,6 @@ export class MqttDecoder {
   public parse (): MqttPacket | null {
     this.parseFixedHeader();
     this.parseVariableData();
-
     const packet = this.packet;
     const isPacketEmpty = !packet.b;
     const isParsingInProgress = this.state !== DECODER_STATE.BYTE;
@@ -62,37 +61,41 @@ export class MqttDecoder {
   private consumeVarInt (): number {
     const list = this.list;
     const length = list.length;
-
     if (length < 1) return -1;
     const b1 = list.readUInt8(0);
     if (b1 ^ 0b10000000) {
       list.consume(1);
       return b1 & 0b01111111;
     }
-
     if (length < 2) return -1;
     const b2 = list.readUInt8(1);
     if (b2 ^ 0b10000000) {
       list.consume(2);
-      return ((b2 & 0b01111111) << 7 * 1) + (b1 & 0b01111111);
+      return ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
     }
-
     if (length < 3) return -1;
     const b3 = list.readUInt8(2);
     if (b3 ^ 0b10000000) {
       list.consume(3);
-      return ((b3 & 0b01111111) << 7 * 2) + ((b2 & 0b01111111) << 7 * 1) + (b1 & 0b01111111);
+      return ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
     }
-
     if (length < 4) return -1;
     const b4 = list.readUInt8(3);
     list.consume(4);
-    return ((b4 & 0b01111111) << 7 * 3) + ((b3 & 0b01111111) << 7 * 2) + ((b2 & 0b01111111) << 7 * 1) + (b1 & 0b01111111);
+    return ((b4 & 0b01111111) << 21) + ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
   }
 
-  public parseVariableData () {
+  public parseVariableData (): void {
     if (this.state !== DECODER_STATE.DATA) return;
-
+    const {packet, list} = this;
+    const length = packet.l;
+    if (!length) {
+      this.state = DECODER_STATE.BYTE;
+      return;
+    }
+    if (list.length < length) return;
+    packet.data = list.shallowSlice(0, length);
+    list.consume(length);
     this.state = DECODER_STATE.BYTE;
   }
 }
