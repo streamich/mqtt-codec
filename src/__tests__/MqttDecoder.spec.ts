@@ -1,8 +1,9 @@
 import {MqttDecoder} from '../MqttDecoder';
-import {connect, connectAck, connectWithClientId, publish1, subscribe, subscribeAck} from './util';
+import {connect, connectAck, connectWithClientId, publish3111, subscribe, subscribeAck} from './util';
 import {PACKET_TYPE, PROPERTY} from '../enums';
 import {PacketConnect} from '../packets/connect';
-import { PacketConnack } from '../packets/connack';
+import {PacketConnack} from '../packets/connack';
+import {PacketPublish} from '../packets/publish';
 
 it('can instantiate', () => {
   const decoder = new MqttDecoder();
@@ -122,6 +123,7 @@ describe('CONNACK', () => {
 
   it('parses variable header', () => {
     const decoder = new MqttDecoder();
+    decoder.version = 5;
     decoder.push(connectAck);
     const packet: PacketConnack = decoder.parse() as PacketConnack;
     expect(packet.f).toBe(0);
@@ -133,31 +135,26 @@ describe('CONNACK', () => {
   });
 });
 
-it('can parse SUBACK packet fixed header', () => {
-  const decoder = new MqttDecoder();
-  decoder.push(subscribeAck);
-  const packet = decoder.parse();
-  expect(packet!.type()).toBe(PACKET_TYPE.SUBACK);
-  expect(packet!.dup()).toBe(false);
-  expect(packet!.qos()).toBe(0);
-  expect(packet!.retain()).toBe(false);
+describe('PUBLISH', () => {
+  it('parses PUBLISH variable data', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(publish3111);
+    const packet: PacketPublish = decoder.parse() as PacketPublish;
+    expect(packet.b).toBe(publish3111.readUInt8(0));
+    expect(packet.l).toBe(publish3111.readUInt8(1));
+    expect(packet.t).toBe('zibel32/18fe34f1d68e/$name');
+    expect(packet.i).toBe(23145);
+    expect(packet.p).toEqual({});
+    expect(packet.d.toString()).toMatchInlineSnapshot(`"bel32 Garage Door"`);
+  });
 });
 
-// it('parses CONNACK variable data', () => {
+// it('can parse SUBACK packet fixed header', () => {
 //   const decoder = new MqttDecoder();
-//   decoder.push(connectAck);
+//   decoder.push(subscribeAck);
 //   const packet = decoder.parse();
-//   expect(!!packet!.data!).toBe(true);
-//   expect(packet!.l).toBe(connectAck.byteLength - 2);
-//   expect(packet!.data!.length).toBe(connectAck.byteLength - 2);
-//   expect(packet!.data!.readInt8(0)).toBe(0);
-//   expect(packet!.data!.readInt8(1)).toBe(0);
-// });
-
-// it('parses PUBLISH variable data', () => {
-//   const decoder = new MqttDecoder();
-//   decoder.push(publish1);
-//   const packet = decoder.parse();
-//   expect(!!packet!.data!).toBe(true);
-//   expect(packet!.l).toBe(publish1.byteLength - 2);
+//   expect(packet!.type()).toBe(PACKET_TYPE.SUBACK);
+//   expect(packet!.dup()).toBe(false);
+//   expect(packet!.qos()).toBe(0);
+//   expect(packet!.retain()).toBe(false);
 // });

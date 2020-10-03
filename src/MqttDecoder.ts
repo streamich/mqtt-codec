@@ -1,8 +1,8 @@
 import BufferList from 'bl';
 import {DECODER_STATE, PACKET_TYPE} from './enums';
-import {PacketSuback, PacketPublish} from './packet';
 import {PacketConnack, parseConnack} from './packets/connack';
 import {PacketConnect, parseConnect} from './packets/connect';
+import {PacketPublish, parsePublish} from './packets/publish';
 
 export class MqttDecoder {
   public state: DECODER_STATE = DECODER_STATE.HEADER;
@@ -10,7 +10,9 @@ export class MqttDecoder {
   public list = new BufferList();
   public b: number = 0;
   public l: number = 0;
-  public version: number = 5; // MQTT protocol version.
+
+  // MQTT protocol version. Defaults to 4 as that is most popular version currently.
+  public version: number = 4;
 
   constructor() {}
 
@@ -28,7 +30,7 @@ export class MqttDecoder {
     this.list = new BufferList();
   }
 
-  public parse(): null | PacketConnect | PacketConnack | PacketSuback | PacketPublish {
+  public parse(): null | PacketConnect | PacketConnack | PacketPublish {
     this.parseFixedHeader();
     const data = this.parseVariableData();
     if (!data) return null;
@@ -44,11 +46,10 @@ export class MqttDecoder {
         return parseConnack(b, l, data, this.version);
       }
       case PACKET_TYPE.SUBACK: {
-        const packet = new PacketSuback(b, l, data);
-        return packet;
+        return null;
       }
       case PACKET_TYPE.PUBLISH: {
-        const packet = new PacketPublish(b, l, data);
+        const packet = parsePublish(b, l, data, this.version);
         return packet;
       }
       default: {

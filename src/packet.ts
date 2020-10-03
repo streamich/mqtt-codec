@@ -37,15 +37,3 @@ export class Packet implements PacketHeaderData {
     return !!(this.b & 0b1);
   }
 }
-
-export class PacketSuback extends Packet {
-  constructor(b: number, l: number, public readonly data: BufferList) {
-    super(b, l);
-  }
-}
-
-export class PacketPublish extends Packet {
-  constructor(b: number, l: number, public readonly data: BufferList) {
-    super(b, l);
-  }
-}
