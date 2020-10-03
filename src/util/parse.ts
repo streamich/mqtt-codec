@@ -79,12 +79,12 @@ export const parseProps = (list: BufferList, offset: number): [props: Properties
         }
       case PROPERTY.UserProperty:
         {
-          if (props[PROPERTY.UserProperty]) props[PROPERTY.UserProperty] = {};
+          if (props[PROPERTY.UserProperty]) props[PROPERTY.UserProperty] = [];
           const key = parseBinary(list, offset);
           offset += 2 + key.byteLength;
           const value = parseBinary(list, offset);
           offset += 2 + value.byteLength;
-          props[PROPERTY.UserProperty]![key.toString('utf8')] = value.toString('utf8');
+          props[PROPERTY.UserProperty]!.push([key.toString('utf8'), value.toString('utf8')]);
           break;
         }
       default:

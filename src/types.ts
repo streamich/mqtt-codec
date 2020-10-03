@@ -25,7 +25,7 @@ export interface Properties {
   [PROPERTY.TopicAlias]?: number;
   [PROPERTY.MaximumQoS]?: number;
   [PROPERTY.RetainAvailable]?: number;
-  [PROPERTY.UserProperty]?: Record<string, undefined | string>;
+  [PROPERTY.UserProperty]?: [name: string, value: string][];
   [PROPERTY.MaximumPacketSize]?: number;
   [PROPERTY.WildcardSubscriptionAvailable]?: number;
   [PROPERTY.SubscriptionIdentifierAvailable]?: number;
