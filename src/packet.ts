@@ -38,12 +38,6 @@ export class Packet implements PacketHeaderData {
   }
 }
 
-export class PacketConnack extends Packet {
-  constructor(b: number, l: number, public readonly data: BufferList) {
-    super(b, l);
-  }
-}
-
 export class PacketSuback extends Packet {
   constructor(b: number, l: number, public readonly data: BufferList) {
     super(b, l);

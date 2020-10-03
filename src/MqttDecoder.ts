@@ -1,7 +1,8 @@
 import BufferList from 'bl';
 import {DECODER_STATE, PACKET_TYPE} from './enums';
-import {PacketConnack, PacketSuback, PacketPublish} from './packet';
-import {PacketConnect} from './packets/connect';
+import {PacketSuback, PacketPublish} from './packet';
+import {PacketConnack, parseConnack} from './packets/connack';
+import {PacketConnect, parseConnect} from './packets/connect';
 
 export class MqttDecoder {
   public state: DECODER_STATE = DECODER_STATE.HEADER;
@@ -9,6 +10,7 @@ export class MqttDecoder {
   public list = new BufferList();
   public b: number = 0;
   public l: number = 0;
+  public version: number = 5; // MQTT protocol version.
 
   constructor() {}
 
@@ -34,12 +36,12 @@ export class MqttDecoder {
     const type: PACKET_TYPE = (b >> 4) as PACKET_TYPE;
     switch (type) {
       case PACKET_TYPE.CONNECT: {
-        const packet = PacketConnect.parse(b, l, data);
+        const packet = parseConnect(b, l, data);
+        this.version = packet.v;
         return packet;
       }
       case PACKET_TYPE.CONNACK: {
-        const packet = new PacketConnack(b, l, data);
-        return packet;
+        return parseConnack(b, l, data, this.version);
       }
       case PACKET_TYPE.SUBACK: {
         const packet = new PacketSuback(b, l, data);
@@ -90,33 +92,6 @@ export class MqttDecoder {
     this.l = ((b4 & 0b01111111) << 21) + ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
     this.state = DECODER_STATE.DATA;
   }
-
-  // private consumeVarInt (): number {
-  //   const list = this.list;
-  //   const length = list.length;
-  //   if (length < 1) return -1;
-  //   const b1 = list.readUInt8(0);
-  //   if (b1 ^ 0b10000000) {
-  //     list.consume(1);
-  //     return b1 & 0b01111111;
-  //   }
-  //   if (length < 2) return -1;
-  //   const b2 = list.readUInt8(1);
-  //   if (b2 ^ 0b10000000) {
-  //     list.consume(2);
-  //     return ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
-  //   }
-  //   if (length < 3) return -1;
-  //   const b3 = list.readUInt8(2);
-  //   if (b3 ^ 0b10000000) {
-  //     list.consume(3);
-  //     return ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
-  //   }
-  //   if (length < 4) return -1;
-  //   const b4 = list.readUInt8(3);
-  //   list.consume(4);
-  //   return ((b4 & 0b01111111) << 21) + ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
-  // }
 
   public parseVariableData(): null | BufferList {
     if (this.state !== DECODER_STATE.DATA) return null;

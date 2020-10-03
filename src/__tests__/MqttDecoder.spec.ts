@@ -2,6 +2,7 @@ import {MqttDecoder} from '../MqttDecoder';
 import {connect, connectAck, connectWithClientId, publish1, subscribe, subscribeAck} from './util';
 import {PACKET_TYPE, PROPERTY} from '../enums';
 import {PacketConnect} from '../packets/connect';
+import { PacketConnack } from '../packets/connack';
 
 it('can instantiate', () => {
   const decoder = new MqttDecoder();
@@ -107,15 +108,29 @@ describe('CONNECT', () => {
   });
 });
 
-it('can parse CONNACK packet fixed header', () => {
-  const decoder = new MqttDecoder();
-  decoder.push(connectAck);
-  const packet = decoder.parse();
-  expect(packet!.l).toBe(connectAck.byteLength - 2);
-  expect(packet!.type()).toBe(PACKET_TYPE.CONNACK);
-  expect(packet!.dup()).toBe(false);
-  expect(packet!.qos()).toBe(0);
-  expect(packet!.retain()).toBe(false);
+describe('CONNACK', () => {
+  it('can parse CONNACK packet fixed header', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(connectAck);
+    const packet = decoder.parse();
+    expect(packet!.l).toBe(connectAck.byteLength - 2);
+    expect(packet!.type()).toBe(PACKET_TYPE.CONNACK);
+    expect(packet!.dup()).toBe(false);
+    expect(packet!.qos()).toBe(0);
+    expect(packet!.retain()).toBe(false);
+  });
+
+  it('parses variable header', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(connectAck);
+    const packet: PacketConnack = decoder.parse() as PacketConnack;
+    expect(packet.f).toBe(0);
+    expect(packet.c).toBe(1);
+    expect(packet.p).toEqual({
+      [PROPERTY.TopicAliasMaximum]: 10,
+      [PROPERTY.AssignedClientIdentifier]: 'auto-A685BAC0-7182-E166-242A-3FD8358C03C8',
+    });
+  });
 });
 
 it('can parse SUBACK packet fixed header', () => {
