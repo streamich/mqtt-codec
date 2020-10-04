@@ -7,6 +7,7 @@ import {PacketPublish} from '../packets/publish';
 import {PacketPuback} from '../packets/puback';
 import {PacketPubrec} from '../packets/pubrec';
 import {PacketSubscribe} from '../packets/subscribe';
+import { PacketSuback } from '../packets/suback';
 
 it('can instantiate', () => {
   const decoder = new MqttDecoder();
@@ -477,5 +478,46 @@ describe('SUBSCRIBE', () => {
     expect(packet.s[2].noLocal()).toBe(true);
     expect(packet.s[2].retainAsPublished()).toBe(false);
     expect(packet.s[2].retainHandling()).toBe(0);
+  });
+});
+
+describe('SUBACK', () => {
+  it('parses MQTT 3.1.1 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(Buffer.from([
+      144, 6, // Header
+      0, 6, // Message ID
+      0, 1, 2, 128 // Granted qos (0, 1, 2) and a rejected being 0x80
+    ]));
+    const packet: PacketSuback = decoder.parse() as PacketSuback;
+    expect(packet.b).toBe(144);
+    expect(packet.l).toBe(6);
+    expect(packet.i).toBe(6);
+    expect(packet.p).toEqual({});
+    expect(packet.s).toEqual([0, 1, 2, 128]);
+  });
+
+  it('parses MQTT 5.0 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.version = 5;
+    decoder.push(Buffer.from([
+      144, 27, // Header
+      0, 6, // Message ID
+      20, // properties length
+      31, 0, 4, 116, 101, 115, 116, // reasonString
+      38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+      0, 1, 2, 1 // Granted qos (0, 1, 2) and a rejected being 0x80
+    ]));
+    const packet: PacketSuback = decoder.parse() as PacketSuback;
+    expect(packet.b).toBe(144);
+    expect(packet.l).toBe(27);
+    expect(packet.i).toBe(6);
+    expect(packet.p).toEqual({
+      [PROPERTY.ReasonString]: 'test',
+      [PROPERTY.UserProperty]: [
+        ['test', 'test'],
+      ],
+    });
+    expect(packet.s).toEqual([0, 1, 2, 1]);
   });
 });
