@@ -49,6 +49,7 @@ export const parseProps = (data: BufferList, offset: number): [props: Properties
       }
       case PROPERTY.MessageExpiryInterval:
       case PROPERTY.WillDelayInterval:
+      case PROPERTY.SessionExpiryInterval:
       case PROPERTY.MaximumPacketSize: {
         props[byte] = data.readUInt32BE(offset);
         offset += 4;

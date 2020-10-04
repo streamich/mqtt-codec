@@ -14,6 +14,7 @@ import { PacketPingreq } from '../packets/pingreq';
 import { PacketPubcomp } from '../packets/pubcomp';
 import { PacketPubrel } from '../packets/pubrel';
 import { PacketPingresp } from '../packets/pingresp';
+import { PacketDisconnect } from '../packets/disconnect';
 
 it('can instantiate', () => {
   const decoder = new MqttDecoder();
@@ -705,6 +706,46 @@ describe('PINGRESP', () => {
     const packet: PacketPingresp = decoder.parse() as PacketPingresp;
     expect(packet).toBeInstanceOf(PacketPingresp);
     expect(packet.b).toBe(208);
+    expect(packet.l).toBe(0);
+  });
+});
+
+describe('DISCONNECT', () => {
+  it('parses MQTT 5.0 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.version = 5;
+    decoder.push(Buffer.from([
+      224, 34, // Header
+      0, // reason code
+      32, // properties length
+      17, 0, 0, 0, 145, // sessionExpiryInterval
+      31, 0, 4, 116, 101, 115, 116, // reasonString
+      38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+      28, 0, 4, 116, 101, 115, 116// serverReference
+    ]));
+    const packet: PacketDisconnect = decoder.parse() as PacketDisconnect;
+    expect(packet).toBeInstanceOf(PacketDisconnect);
+    expect(packet.b).toBe(224);
+    expect(packet.l).toBe(34);
+    expect(packet.c).toBe(0);
+    expect(packet.p).toEqual({
+      [PROPERTY.SessionExpiryInterval]: 145,
+      [PROPERTY.ReasonString]: 'test',
+      [PROPERTY.ServerReference]: 'test',
+      [PROPERTY.UserProperty]: [
+        ['test', 'test'],
+      ],
+    });
+  });
+
+  it('parses MQTT 3.1.1 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(Buffer.from([
+      224, 0 // Header
+    ]));
+    const packet: PacketDisconnect = decoder.parse() as PacketDisconnect;
+    expect(packet).toBeInstanceOf(PacketDisconnect);
+    expect(packet.b).toBe(224);
     expect(packet.l).toBe(0);
   });
 });

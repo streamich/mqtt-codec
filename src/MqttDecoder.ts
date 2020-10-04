@@ -13,6 +13,7 @@ import {PacketUnsubscribe, parseUnsubscribe} from './packets/unsubscribe';
 import {PacketUnsuback, parseUnsuback} from './packets/unsuback';
 import {PacketPingreq} from './packets/pingreq';
 import {PacketPingresp} from './packets/pingresp';
+import {PacketDisconnect, parseDisconnect} from './packets/disconnect';
 
 export class MqttDecoder {
   public state: DECODER_STATE = DECODER_STATE.HEADER;
@@ -21,7 +22,7 @@ export class MqttDecoder {
   public b: number = 0;
   public l: number = 0;
 
-  // MQTT protocol version. Defaults to 4 as that is most popular version currently.
+  // MQTT protocol version. Defaults to 4 as that is most popular version now.
   public version: number = 4;
 
   constructor() {}
@@ -53,7 +54,9 @@ export class MqttDecoder {
   | PacketSuback
   | PacketUnsubscribe
   | PacketUnsuback
-  | PacketPingreq {
+  | PacketPingreq
+  | PacketPingresp
+  | PacketDisconnect {
     this.parseFixedHeader();
     const data = this.parseVariableData();
     if (!data) return null;
@@ -65,54 +68,20 @@ export class MqttDecoder {
         this.version = packet.v;
         return packet;
       }
-      case PACKET_TYPE.CONNACK: {
-        return parseConnack(b, l, data, this.version);
-      }
-      case PACKET_TYPE.PUBLISH: {
-        const packet = parsePublish(b, l, data, this.version);
-        return packet;
-      }
-      case PACKET_TYPE.PUBACK: {
-        const packet = parsePuback(b, l, data, this.version);
-        return packet;
-      }
-      case PACKET_TYPE.PUBREC: {
-        const packet = parsePubrec(b, l, data, this.version);
-        return packet;
-      }
-      case PACKET_TYPE.PUBREL: {
-        const packet = parsePubrel(b, l, data, this.version);
-        return packet;
-      }
-      case PACKET_TYPE.PUBCOMP: {
-        const packet = parsePubcomp(b, l, data, this.version);
-        return packet;
-      }
-      case PACKET_TYPE.SUBSCRIBE: {
-        const packet = parseSubscribe(b, l, data, this.version);
-        return packet;
-      }
-      case PACKET_TYPE.SUBACK: {
-        const packet = parseSuback(b, l, data, this.version);
-        return packet;
-      }
-      case PACKET_TYPE.UNSUBSCRIBE: {
-        const packet = parseUnsubscribe(b, l, data, this.version);
-        return packet;
-      }
-      case PACKET_TYPE.UNSUBACK: {
-        const packet = parseUnsuback(b, l, data, this.version);
-        return packet;
-      }
-      case PACKET_TYPE.PINGREQ: {
-        return new PacketPingreq(b, l);
-      }
-      case PACKET_TYPE.PINGRESP: {
-        return new PacketPingresp(b, l);
-      }
-      default: {
-        throw ERROR.MALFORMED_PACKET;
-      }
+      case PACKET_TYPE.CONNACK: return parseConnack(b, l, data, this.version);
+      case PACKET_TYPE.PUBLISH: return parsePublish(b, l, data, this.version);
+      case PACKET_TYPE.PUBACK: return parsePuback(b, l, data, this.version);
+      case PACKET_TYPE.PUBREC: return parsePubrec(b, l, data, this.version);
+      case PACKET_TYPE.PUBREL: return parsePubrel(b, l, data, this.version);
+      case PACKET_TYPE.PUBCOMP: return parsePubcomp(b, l, data, this.version);
+      case PACKET_TYPE.SUBSCRIBE: return parseSubscribe(b, l, data, this.version);
+      case PACKET_TYPE.SUBACK: return parseSuback(b, l, data, this.version);
+      case PACKET_TYPE.UNSUBSCRIBE: return parseUnsubscribe(b, l, data, this.version);
+      case PACKET_TYPE.UNSUBACK: return parseUnsuback(b, l, data, this.version);
+      case PACKET_TYPE.PINGREQ: return new PacketPingreq(b, l);
+      case PACKET_TYPE.PINGRESP: return new PacketPingresp(b, l);
+      case PACKET_TYPE.DISCONNECT: return parseDisconnect(b, l, data, this.version);
+      default: throw ERROR.MALFORMED_PACKET;
     }
   }
 
