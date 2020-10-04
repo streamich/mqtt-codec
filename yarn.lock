@@ -753,13 +753,6 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
-"@types/bl@^2.1.0":
-  version "2.1.0"
-  resolved "https://registry.yarnpkg.com/@types/bl/-/bl-2.1.0.tgz#45c881c97feae1223d63bbc5b83166153fcb2a15"
-  integrity sha512-1TdA9IXOy4sdqn8vgieQ6GZAiHiPNrOiO1s2GJjuYPw4QVY7gYoVjkW049avj33Ez7IcIvu43hQsMsoUFbCn2g==
-  dependencies:
-    "@types/node" "*"
-
 "@types/color-name@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"

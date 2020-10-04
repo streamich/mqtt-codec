@@ -1,7 +1,7 @@
 import {BufferList} from './BufferList';
 import {ERROR, PACKET_TYPE} from './enums';
 import {PacketConnack, parseConnack} from './packets/connack';
-import {PacketConnect, parseConnect} from './packets/connect';
+import {PacketConnect} from './packets/connect';
 import {PacketPublish} from './packets/publish';
 import {PacketPuback, parsePuback} from './packets/puback';
 import {PacketPubrec, parsePubrec} from './packets/pubrec';
@@ -153,9 +153,52 @@ export class MqttDecoder {
           return new PacketPublish(b, l, t, i, p, d);
         }
         case PACKET_TYPE.CONNECT: {
-          const packet = parseConnect(b, l, list, offset);
-          this.version = packet.v;
+          const buf = list.slice(offset, offset + l);
           list.consume(packetEndOffset);
+          offset = 2 + buf.readUInt16BE(0); // Skip "MQTT" or "MQIsdp" protocol name.
+          const v = buf.readUInt8(offset++);
+          const f = buf.readUInt8(offset++);
+          const k = buf.readUInt16BE(offset);
+          offset += 2;
+          // const ui32 = buf.readUInt32BE(offset);
+          // const v = (ui32 & 0xFF000000) >> 24;
+          // const f = (ui32 & 0xFF0000) >> 16;
+          // const k = (ui32 & 0xFFFF);
+          // offset += 4;
+          let p: Properties = {};
+          if (v === 5) {
+            const [props, propsSize] = parseProps(buf, offset);
+            p = props;
+            offset += propsSize;
+          }
+          const clientId = parseBinary(buf, offset);
+          const id = clientId.toString('utf8');
+          offset += 2 + clientId.byteLength;
+          const packet = new PacketConnect(b, l, v, f, k, p, id);
+          if (packet.willFlag()) {
+            if (v === 5) {
+              const [props, propsSize] = parseProps(buf, offset);
+              packet.wp = props;
+              offset += propsSize;
+            } else packet.wp = {};
+            const willTopic = parseBinary(buf, offset);
+            packet.wt = willTopic.toString('utf8');
+            offset += 2 + willTopic.byteLength;
+            const willPayload = parseBinary(buf, offset);
+            packet.w = willPayload;
+            offset += 2 + willPayload.byteLength;
+          }
+          if (packet.userNameFlag()) {
+            const userName = parseBinary(buf, offset);
+            packet.usr = userName.toString('utf8');
+            offset += 2 + userName.byteLength;
+          }
+          if (packet.passwordFlag()) {
+            const password = parseBinary(buf, offset);
+            packet.pwd = password;
+            offset += 2 + password.byteLength;
+          }
+          this.version = packet.v;
           return packet;
         }
         case PACKET_TYPE.CONNACK: {

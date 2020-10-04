@@ -31,3 +31,10 @@ export interface Properties {
   [PROPERTY.SubscriptionIdentifierAvailable]?: number;
   [PROPERTY.SharedSubscriptionAvailable]?: number;
 }
+
+export interface BufferLike {
+  readUInt8(offset: number): number;
+  readUInt16BE(offset: number): number;
+  readUInt32BE(offset: number): number;
+  slice(start: number, end: number): Buffer;
+}

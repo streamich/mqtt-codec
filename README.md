@@ -2,6 +2,7 @@
 
 - MQTT packet encoder/decoder for Node.js.
 - `mqtt-codec` is 4-10x faster than `mqtt-packet`, see benchmarks below and uses less memory.
+- Zero dependencies.
 
 ## Benchmarks
 
