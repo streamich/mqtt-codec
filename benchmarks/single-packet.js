@@ -9,12 +9,13 @@ for (const name of Object.keys(packets)) {
   suite
     .add(`mqtt-codec (${name})`, function() {
       const decoder = new MqttDecoder();
-      decoder.push(Buffer.from(packets[name]));
+      decoder.version = 5;
+      decoder.push(packets[name]);
       decoder.parse();
     })
     .add(`mqtt-packet (${name})`, function() {
-      const parser = mqtt.parser();
-      parser.parse(Buffer.from(packets[name]));
+      const parser = mqtt.parser({ protocolVersion: 5 });
+      parser.parse(packets[name]);
     });
 }
 
