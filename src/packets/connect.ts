@@ -70,8 +70,8 @@ export class PacketConnect extends Packet implements PacketConnectData {
   }
 }
 
-export const parseConnect = (b: number, l: number, data: BufferList): PacketConnect => {
-  let offset = 2 + data.readUInt16BE(0); // Skip "MQTT" or "MQIsdp" protocol name.
+export const parseConnect = (b: number, l: number, data: BufferList, offset: number): PacketConnect => {
+  offset += 2 + data.readUInt16BE(offset); // Skip "MQTT" or "MQIsdp" protocol name.
   const v = data.readUInt8(offset++);
   const f = data.readUInt8(offset++);
   const k = data.readUInt16BE(offset);

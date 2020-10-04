@@ -24,14 +24,14 @@ export class PacketPuback extends Packet implements PacketPubackData {
   }
 }
 
-export const parsePuback = (b: number, l: number, data: BufferList, version: number): PacketPuback => {
-  const i = data.readUInt16BE(0);
+export const parsePuback = (b: number, l: number, data: BufferList, version: number, offset: number): PacketPuback => {
+  const i = data.readUInt16BE(offset);
   let c: number = 0;
   let p: Properties = {};
   if (version === 5) {
-    c = data.readUInt8(2);
+    c = data.readUInt8(offset + 2);
     if (l > 3) {
-      [p] = parseProps(data, 3);
+      [p] = parseProps(data, offset + 3);
     }
   }
   return new PacketPuback(b, l, i, c, p);

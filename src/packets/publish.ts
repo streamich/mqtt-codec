@@ -27,9 +27,9 @@ export class PacketPublish extends Packet implements PacketPublishData {
   }
 }
 
-export const parsePublish = (b: number, l: number, data: BufferList, version: number): PacketPublish => {
-  const topic = parseBinary(data, 0);
-  let offset = 2 + topic.byteLength;
+export const parsePublish = (b: number, l: number, data: BufferList, version: number, offset: number): PacketPublish => {
+  const topic = parseBinary(data, offset);
+  offset += 2 + topic.byteLength;
   let i: number = 0;
   if (((b >> 1) & 0b11) > 0) {
     i = data.readUInt16BE(offset);
@@ -42,6 +42,6 @@ export const parsePublish = (b: number, l: number, data: BufferList, version: nu
     offset += size;
   }
   const d = data.slice(offset, data.length);
-  const packet = new PacketPublish(b, l, topic.toString('utf8'), i, p, d);
-  return packet;
+  const t = topic.toString('utf8');
+  return new PacketPublish(b, l, t, i, p, d);
 };

@@ -21,8 +21,8 @@ export class PacketAuth extends Packet implements PacketAuthData {
   }
 }
 
-export const parseAuth = (b: number, l: number, data: BufferList, version: number): PacketAuth => {
-  const c: number = data.readUInt8(0);
-  const [p] = parseProps(data, 1);
+export const parseAuth = (b: number, l: number, data: BufferList, version: number, offset: number): PacketAuth => {
+  const c: number = data.readUInt8(offset);
+  const [p] = parseProps(data, offset + 1);
   return new PacketAuth(b, l, c, p);
 };

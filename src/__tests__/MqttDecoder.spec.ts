@@ -1233,7 +1233,7 @@ describe('PUBLISH', () => {
       0, 4, // Topic length
       116, 101, 115, 116 // Topic (test)
     ]));
-    expect(decoder.parse()).toBe(null);
+    expect(!!decoder.parse()).toBe(false);
     decoder.push(Buffer.from([
       116, 101, 115, 116 // Payload (test)
     ]));

@@ -24,9 +24,9 @@ export class PacketUnsuback extends Packet implements PacketUnsubackData {
   }
 }
 
-export const parseUnsuback = (b: number, l: number, data: BufferList, version: number): PacketUnsuback => {
-  const i = data.readUInt16BE(0);
-  let offset = 2;
+export const parseUnsuback = (b: number, l: number, data: BufferList, version: number, offset: number): PacketUnsuback => {
+  const i = data.readUInt16BE(offset);
+  offset += 2;
   let p: Properties = {};
   if (version === 5) {
     const [props, size] = parseProps(data, offset);

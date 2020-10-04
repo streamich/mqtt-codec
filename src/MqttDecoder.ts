@@ -1,5 +1,5 @@
 import BufferList from 'bl';
-import {DECODER_STATE, ERROR, PACKET_TYPE} from './enums';
+import {ERROR, PACKET_TYPE} from './enums';
 import {PacketConnack, parseConnack} from './packets/connack';
 import {PacketConnect, parseConnect} from './packets/connect';
 import {PacketPublish, parsePublish} from './packets/publish';
@@ -15,10 +15,20 @@ import {PacketPingreq} from './packets/pingreq';
 import {PacketPingresp} from './packets/pingresp';
 import {PacketDisconnect, parseDisconnect} from './packets/disconnect';
 import {PacketAuth, parseAuth} from './packets/auth';
+import { parseBinary, parseProps } from './util/parse';
+import { Properties } from './types';
+
+const enum DECODER_STATE {
+  HEADER = 0,
+  DATA = 1,
+}
+
+const parsers = new Map();
+parsers.set(PACKET_TYPE.PUBLISH, parsePublish);
 
 export class MqttDecoder {
   /** Keeps track of which part message framing are we in. */
-  public state: DECODER_STATE = DECODER_STATE.HEADER;
+  private state: DECODER_STATE = DECODER_STATE.HEADER;
 
   /** Buffer which contains all unparsed buffered data. */
   public list = new BufferList();
@@ -34,6 +44,8 @@ export class MqttDecoder {
    * This version is automatically set to the version received in CONNECT packet.
    */
   public version: number = 4;
+
+  private offset: number = 0;
 
   /**
    * Use this method to push into decoder all new bytes that arrive over the
@@ -61,7 +73,7 @@ export class MqttDecoder {
    *          the buffer to parse a packet, returns `null`.
    */
   public parse():
-  | null
+  | undefined
   | PacketConnect
   | PacketConnack
   | PacketPublish
@@ -78,95 +90,94 @@ export class MqttDecoder {
   | PacketDisconnect
   | PacketAuth {
     try {
-      this.parseFixedHeader();
-      const data = this.parseVariableData();
-      if (!data) return null;
+      const list = this.list;
+      if (!list.length) return;
+
+      if (this.state === DECODER_STATE.HEADER) {
+        const length = list.length;
+        if (length < 2) return;
+        this.b = list.readUInt8(0);
+        const b1 = list.readUInt8(1);
+        if (b1 & 0b10000000) {
+          if (length < 3) return;
+          const b2 = list.readUInt8(2);
+          if (b2 & 0b10000000) {
+            if (length < 4) return;
+            const b3 = list.readUInt8(3);
+            if (b3 & 0b10000000) {
+              if (length < 5) return;
+              const b4 = list.readUInt8(4);
+              this.offset = 5;
+              this.l = ((b4 & 0b01111111) << 21) + ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
+            } else {
+              this.offset = 4;
+              this.l = ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
+            }
+          } else {
+            this.offset = 3;
+            this.l = ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
+          }
+        } else {
+          this.offset = 2;
+          this.l = b1 & 0b01111111;
+        }
+        this.state = DECODER_STATE.DATA;
+      }
+
+      if (this.state !== DECODER_STATE.DATA) return;
+
+      const {l: length} = this;
+      let offset = this.offset;
+      const end = offset + length;
+      if (list.length < end) return;
+
+      this.state = DECODER_STATE.HEADER;
+      this.offset = 0;
+
       const {b, l} = this;
       const type: PACKET_TYPE = (b >> 4) as PACKET_TYPE;
       switch (type) {
+        case PACKET_TYPE.PUBLISH: {
+          const topic = parseBinary(list, offset);
+          offset += 2 + topic.byteLength;
+          let i: number = 0;
+          if (((b >> 1) & 0b11) > 0) {
+            i = list.readUInt16BE(offset);
+            offset += 2;
+          }
+          let p: Properties = {};
+          if (this.version === 5) {
+            const [props, size] = parseProps(list, offset);
+            p = props;
+            offset += size;
+          }
+          const d = list.slice(offset, list.length);
+          const t = topic.toString('utf8');
+          list.consume(end);
+          return new PacketPublish(b, l, t, i, p, d);
+        }
         case PACKET_TYPE.CONNECT: {
-          const packet = parseConnect(b, l, data);
+          const packet = parseConnect(b, l, list, offset);
           this.version = packet.v;
           return packet;
         }
-        case PACKET_TYPE.CONNACK: return parseConnack(b, l, data, this.version);
-        case PACKET_TYPE.PUBLISH: return parsePublish(b, l, data, this.version);
-        case PACKET_TYPE.PUBACK: return parsePuback(b, l, data, this.version);
-        case PACKET_TYPE.PUBREC: return parsePubrec(b, l, data, this.version);
-        case PACKET_TYPE.PUBREL: return parsePubrel(b, l, data, this.version);
-        case PACKET_TYPE.PUBCOMP: return parsePubcomp(b, l, data, this.version);
-        case PACKET_TYPE.SUBSCRIBE: return parseSubscribe(b, l, data, this.version);
-        case PACKET_TYPE.SUBACK: return parseSuback(b, l, data, this.version);
-        case PACKET_TYPE.UNSUBSCRIBE: return parseUnsubscribe(b, l, data, this.version);
-        case PACKET_TYPE.UNSUBACK: return parseUnsuback(b, l, data, this.version);
+        case PACKET_TYPE.CONNACK: return parseConnack(b, l, list, this.version, offset);
+        case PACKET_TYPE.PUBACK: return parsePuback(b, l, list, this.version, offset);
+        case PACKET_TYPE.PUBREC: return parsePubrec(b, l, list, this.version, offset);
+        case PACKET_TYPE.PUBREL: return parsePubrel(b, l, list, this.version, offset);
+        case PACKET_TYPE.PUBCOMP: return parsePubcomp(b, l, list, this.version, offset);
+        case PACKET_TYPE.SUBSCRIBE: return parseSubscribe(b, l, list, this.version, offset);
+        case PACKET_TYPE.SUBACK: return parseSuback(b, l, list, this.version, offset);
+        case PACKET_TYPE.UNSUBSCRIBE: return parseUnsubscribe(b, l, list, this.version, offset);
+        case PACKET_TYPE.UNSUBACK: return parseUnsuback(b, l, list, this.version, offset);
         case PACKET_TYPE.PINGREQ: return new PacketPingreq(b, l);
         case PACKET_TYPE.PINGRESP: return new PacketPingresp(b, l);
-        case PACKET_TYPE.DISCONNECT: return parseDisconnect(b, l, data, this.version);
-        case PACKET_TYPE.AUTH: return parseAuth(b, l, data, this.version);
+        case PACKET_TYPE.DISCONNECT: return parseDisconnect(b, l, list, this.version, offset);
+        case PACKET_TYPE.AUTH: return parseAuth(b, l, list, this.version, offset);
         default: throw ERROR.MALFORMED_PACKET;
       }
     } catch (error) {
       throw ERROR.MALFORMED_PACKET;
     }
-  }
-
-  /**
-   * Parse a single packet fixed header from the buffer. And advance state to
-   * payload parsing. This method is idempotent, you can call it many times. If
-   * there is not enough data to parse the header, this method will do nothing.
-   * Also, if the decoder currently is not in fixed header parsing state, it
-   * will do nothing.
-   */
-  private parseFixedHeader(): void {
-    if (this.state !== DECODER_STATE.HEADER) return;
-    const list = this.list;
-    const length = list.length;
-    if (length < 2) return;
-    this.b = list.readUInt8(0);
-    const b1 = list.readUInt8(1);
-    if (!(b1 & 0b10000000)) {
-      list.consume(2);
-      this.l = b1 & 0b01111111;
-      this.state = DECODER_STATE.DATA;
-      return;
-    }
-    if (length < 3) return;
-    const b2 = list.readUInt8(2);
-    if (!(b2 & 0b10000000)) {
-      list.consume(3);
-      this.l = ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
-      this.state = DECODER_STATE.DATA;
-      return;
-    }
-    if (length < 4) return;
-    const b3 = list.readUInt8(3);
-    if (!(b3 & 0b10000000)) {
-      list.consume(4);
-      this.l = ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
-      this.state = DECODER_STATE.DATA;
-      return;
-    }
-    if (length < 5) return;
-    const b4 = list.readUInt8(4);
-    list.consume(5);
-    this.l = ((b4 & 0b01111111) << 21) + ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
-    this.state = DECODER_STATE.DATA;
-  }
-
-  /**
-   * Parse a single packet variable data and advance the parsing step.
-   * This method is idempotent, you can call it many times. If
-   * there is not enough data to parse the variable payload, this method will
-   * do nothing. Also, if the decoder currently is not in the variable data
-   * parsing state, it will do nothing.
-   */
-  private parseVariableData(): null | BufferList {
-    if (this.state !== DECODER_STATE.DATA) return null;
-    const {list, l: length} = this;
-    if (list.length < length) return null;
-    const slice = list.shallowSlice(0, length);
-    list.consume(length);
-    this.state = DECODER_STATE.HEADER;
-    return slice;
   }
 }

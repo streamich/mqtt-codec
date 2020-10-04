@@ -24,9 +24,9 @@ export class PacketUnsubscribe extends Packet implements PacketUnsubscribeData {
   }
 }
 
-export const parseUnsubscribe = (b: number, l: number, data: BufferList, version: number): PacketUnsubscribe => {
-  const i = data.readUInt16BE(0);
-  let offset = 2;
+export const parseUnsubscribe = (b: number, l: number, data: BufferList, version: number, offset: number): PacketUnsubscribe => {
+  const i = data.readUInt16BE(offset);
+  offset += 2;
   let p: Properties = {};
   if (version === 5) {
     const [props, size] = parseProps(data, offset);

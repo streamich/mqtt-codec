@@ -24,14 +24,14 @@ export class PacketPubrec extends Packet implements PacketPubrecData {
   }
 }
 
-export const parsePubrec = (b: number, l: number, data: BufferList, version: number): PacketPubrec => {
-  const i = data.readUInt16BE(0);
+export const parsePubrec = (b: number, l: number, data: BufferList, version: number, offset: number): PacketPubrec => {
+  const i = data.readUInt16BE(offset);
   let c: number = 0;
   let p: Properties = {};
   if (version === 5) {
-    c = data.readUInt8(2);
+    c = data.readUInt8(offset + 2);
     if (l > 3) {
-      [p] = parseProps(data, 3);
+      [p] = parseProps(data, offset + 3);
     }
   }
   return new PacketPubrec(b, l, i, c, p);

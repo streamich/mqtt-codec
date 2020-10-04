@@ -1,8 +1,3 @@
-export const enum DECODER_STATE {
-  HEADER = 0,
-  DATA = 1,
-}
-
 export const enum PACKET_TYPE {
   RESERVED = 0,
   CONNECT = 1,

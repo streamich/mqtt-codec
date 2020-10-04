@@ -28,11 +28,11 @@ export class PacketConnack extends Packet implements PacketConnackData {
   }
 }
 
-export const parseConnack = (b: number, l: number, data: BufferList, version: number): PacketConnack => {
-  const f = data.readUInt8(0);
-  const c = data.readUInt8(1);
+export const parseConnack = (b: number, l: number, data: BufferList, version: number, offset: number): PacketConnack => {
+  const f = data.readUInt8(offset);
+  const c = data.readUInt8(offset + 1);
   let p: Properties = {};
-  if (version === 5) [p] = parseProps(data, 2);
+  if (version === 5) [p] = parseProps(data, offset + 2);
   const packet = new PacketConnack(b, l, f, c, p);
   return packet;
 };
