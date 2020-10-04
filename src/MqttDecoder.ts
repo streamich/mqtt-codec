@@ -1,5 +1,5 @@
 import BufferList from 'bl';
-import {DECODER_STATE, PACKET_TYPE} from './enums';
+import {DECODER_STATE, ERROR, PACKET_TYPE} from './enums';
 import {PacketConnack, parseConnack} from './packets/connack';
 import {PacketConnect, parseConnect} from './packets/connect';
 import {PacketPublish, parsePublish} from './packets/publish';
@@ -10,6 +10,7 @@ import {PacketPubcomp, parsePubcomp} from './packets/pubcomp';
 import {PacketSubscribe, parseSubscribe} from './packets/subscribe';
 import {PacketSuback, parseSuback} from './packets/suback';
 import {PacketUnsubscribe, parseUnsubscribe} from './packets/unsubscribe';
+import {PacketUnsuback, parseUnsuback} from './packets/unsuback';
 
 export class MqttDecoder {
   public state: DECODER_STATE = DECODER_STATE.HEADER;
@@ -37,7 +38,19 @@ export class MqttDecoder {
     this.list = new BufferList();
   }
 
-  public parse(): null | PacketConnect | PacketConnack | PacketPublish | PacketPuback | PacketPubrec | PacketPubrel | PacketPubcomp | PacketSubscribe | PacketSuback | PacketUnsubscribe {
+  public parse():
+  | null
+  | PacketConnect
+  | PacketConnack
+  | PacketPublish
+  | PacketPuback
+  | PacketPubrec
+  | PacketPubrel
+  | PacketPubcomp
+  | PacketSubscribe
+  | PacketSuback
+  | PacketUnsubscribe
+  | PacketUnsuback {
     this.parseFixedHeader();
     const data = this.parseVariableData();
     if (!data) return null;
@@ -84,8 +97,12 @@ export class MqttDecoder {
         const packet = parseUnsubscribe(b, l, data, this.version);
         return packet;
       }
+      case PACKET_TYPE.UNSUBACK: {
+        const packet = parseUnsuback(b, l, data, this.version);
+        return packet;
+      }
       default: {
-        return null;
+        throw ERROR.MALFORMED_PACKET;
       }
     }
   }

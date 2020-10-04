@@ -9,6 +9,7 @@ import {PacketPubrec} from '../packets/pubrec';
 import {PacketSubscribe} from '../packets/subscribe';
 import { PacketSuback } from '../packets/suback';
 import { PacketUnsubscribe } from '../packets/unsubscribe';
+import { PacketUnsuback } from '../packets/unsuback';
 
 it('can instantiate', () => {
   const decoder = new MqttDecoder();
@@ -570,5 +571,31 @@ describe('UNSUBSCRIBE', () => {
       'tfst',
       'test',
     ]);
+  });
+});
+
+describe('UNSUBACK', () => {
+  it('parses MQTT 5.0 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.version = 5;
+    decoder.push(Buffer.from([
+      176, 25, // Header
+      0, 8, // Message ID
+      20, // properties length
+      31, 0, 4, 116, 101, 115, 116, // reasonString
+      38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+      0, 128 // success and error
+    ]));
+    const packet: PacketUnsuback = decoder.parse() as PacketUnsuback;
+    expect(packet.b).toBe(176);
+    expect(packet.l).toBe(25);
+    expect(packet.i).toBe(8);
+    expect(packet.p).toEqual({
+      [PROPERTY.ReasonString]: 'test',
+      [PROPERTY.UserProperty]: [
+        ['test', 'test'],
+      ],
+    });
+    expect(packet.s).toEqual([0, 128]);
   });
 });
