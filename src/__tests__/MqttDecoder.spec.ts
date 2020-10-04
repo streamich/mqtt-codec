@@ -13,6 +13,7 @@ import { PacketUnsuback } from '../packets/unsuback';
 import { PacketPingreq } from '../packets/pingreq';
 import { PacketPubcomp } from '../packets/pubcomp';
 import { PacketPubrel } from '../packets/pubrel';
+import { PacketPingresp } from '../packets/pingresp';
 
 it('can instantiate', () => {
   const decoder = new MqttDecoder();
@@ -679,6 +680,31 @@ describe('PINGREQ', () => {
     const packet: PacketPingreq = decoder.parse() as PacketPingreq;
     expect(packet).toBeInstanceOf(PacketPingreq);
     expect(packet.b).toBe(192);
+    expect(packet.l).toBe(0);
+  });
+});
+
+describe('PINGRESP', () => {
+  it('parses in MQTT 5.0 mode', () => {
+    const decoder = new MqttDecoder();
+    decoder.version = 5;
+    decoder.push(Buffer.from([
+      208, 0 // Header
+    ]));
+    const packet: PacketPingresp = decoder.parse() as PacketPingresp;
+    expect(packet).toBeInstanceOf(PacketPingresp);
+    expect(packet.b).toBe(208);
+    expect(packet.l).toBe(0);
+  });
+
+  it('parses in MQTT 3.1.1 mode', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(Buffer.from([
+      208, 0 // Header
+    ]));
+    const packet: PacketPingresp = decoder.parse() as PacketPingresp;
+    expect(packet).toBeInstanceOf(PacketPingresp);
+    expect(packet.b).toBe(208);
     expect(packet.l).toBe(0);
   });
 });

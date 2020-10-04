@@ -11,7 +11,8 @@ import {PacketSubscribe, parseSubscribe} from './packets/subscribe';
 import {PacketSuback, parseSuback} from './packets/suback';
 import {PacketUnsubscribe, parseUnsubscribe} from './packets/unsubscribe';
 import {PacketUnsuback, parseUnsuback} from './packets/unsuback';
-import {PacketPingreq, parsePingreq} from './packets/pingreq';
+import {PacketPingreq} from './packets/pingreq';
+import {PacketPingresp} from './packets/pingresp';
 
 export class MqttDecoder {
   public state: DECODER_STATE = DECODER_STATE.HEADER;
@@ -104,8 +105,10 @@ export class MqttDecoder {
         return packet;
       }
       case PACKET_TYPE.PINGREQ: {
-        const packet = parsePingreq(b, l, data, this.version);
-        return packet;
+        return new PacketPingreq(b, l);
+      }
+      case PACKET_TYPE.PINGRESP: {
+        return new PacketPingresp(b, l);
       }
       default: {
         throw ERROR.MALFORMED_PACKET;
