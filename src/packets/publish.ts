@@ -30,8 +30,11 @@ export class PacketPublish extends Packet implements PacketPublishData {
 export const parsePublish = (b: number, l: number, data: BufferList, version: number): PacketPublish => {
   const topic = parseBinary(data, 0);
   let offset = 2 + topic.byteLength;
-  const i = data.readUInt16BE(offset);
-  offset += 2;
+  let i: number = 0;
+  if (((b >> 1) & 0b11) > 0) {
+    i = data.readUInt16BE(offset);
+    offset += 2;
+  }
   let p: Properties = {};
   if (version === 5) {
     const [props, size] = parseProps(data, offset);
