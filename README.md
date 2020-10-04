@@ -1,7 +1,7 @@
 # mqtt-codec
 
 - MQTT packet encoder/decoder for Node.js.
-- `mqtt-codec` is 4-10x faster than `mqtt-packet`, see benchmarks below.
+- `mqtt-codec` is 4-10x faster than `mqtt-packet`, see benchmarks below and uses less memory.
 
 ## Benchmarks
 
@@ -36,6 +36,22 @@ mqtt-packet (connackWithProperties) x 551,864 ops/sec ±2.04% (93 runs sampled)
 mqtt-codec (publishSample) x 2,125,866 ops/sec ±0.51% (96 runs sampled)
 mqtt-packet (publishSample) x 514,211 ops/sec ±2.03% (92 runs sampled)
 Fastest is mqtt-codec (connackShort)
+```
+
+You can also run micro-benchmarks to see memory consumption:
+
+```
+node benchmarks/micro/mqtt-codec.js 
+Total packets 10000000
+Total time 3.61
+Packets/s 2.77M
+Memory used 5.43 Mb
+
+node benchmarks/micro/mqtt-packet.js 
+Total packets 10000000
+Total time 20.41
+Packets/s 0.49M
+Memory used 8.89 Mb
 ```
 
 ## License
