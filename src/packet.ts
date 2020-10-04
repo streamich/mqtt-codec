@@ -1,4 +1,3 @@
-import BufferList from 'bl';
 import {PACKET_TYPE} from './enums';
 import {QoS} from './types';
 

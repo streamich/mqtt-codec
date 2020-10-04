@@ -45,6 +45,7 @@
     "@semantic-release/npm": "^7.0.6",
     "@types/bl": "^2.1.0",
     "@types/jest": "^26.0.14",
+    "benchmark": "^2.1.4",
     "husky": "^4.3.0",
     "jest": "^26.4.2",
     "mqtt-packet": "^6.6.0",
