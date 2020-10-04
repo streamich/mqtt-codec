@@ -67,6 +67,13 @@ const packets = {
     21, 0, 4, 116, 101, 115, 116, // authenticationMethod
     22, 0, 4, 1, 2, 3, 4 // authenticationData
   ],
+
+  publishSample: [
+    48, 10, // Header (publish)
+    0, 4, // Topic length
+    116, 101, 115, 116, // Topic (test)
+    116, 101, 115, 116 // Payload (test)
+  ],
 };
 
-exports.packets = packets;
+module.exports = packets;

@@ -1,5 +1,5 @@
 const Benchmark = require('benchmark');
-const {packets} = require('./packets');
+const packets = require('./packets');
 const {MqttDecoder} = require('../es6/MqttDecoder');
 const mqtt = require('mqtt-packet');
 

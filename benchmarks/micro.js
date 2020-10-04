@@ -1,17 +1,13 @@
 const {MqttDecoder} = require('../es6/MqttDecoder');
+const {connectShort, publishSample} = require('./packets');
 
 const parser = new MqttDecoder();
-const max = 10e6;
+const max = 1e6;
 let i;
 const start = Date.now() / 1000;
 
 for (i = 0; i < max; i++) {
-  parser.push(Buffer.from([
-    48, 10, // Header (publish)
-    0, 4, // Topic length
-    116, 101, 115, 116, // Topic (test)
-    116, 101, 115, 116 // Payload (test)
-  ]));
+  parser.push(Buffer.from(connectShort));
   while (parser.parse()) {}
 }
 

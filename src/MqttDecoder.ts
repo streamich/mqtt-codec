@@ -159,21 +159,74 @@ export class MqttDecoder {
         case PACKET_TYPE.CONNECT: {
           const packet = parseConnect(b, l, list, offset);
           this.version = packet.v;
+          list.consume(end);
           return packet;
         }
-        case PACKET_TYPE.CONNACK: return parseConnack(b, l, list, this.version, offset);
-        case PACKET_TYPE.PUBACK: return parsePuback(b, l, list, this.version, offset);
-        case PACKET_TYPE.PUBREC: return parsePubrec(b, l, list, this.version, offset);
-        case PACKET_TYPE.PUBREL: return parsePubrel(b, l, list, this.version, offset);
-        case PACKET_TYPE.PUBCOMP: return parsePubcomp(b, l, list, this.version, offset);
-        case PACKET_TYPE.SUBSCRIBE: return parseSubscribe(b, l, list, this.version, offset);
-        case PACKET_TYPE.SUBACK: return parseSuback(b, l, list, this.version, offset);
-        case PACKET_TYPE.UNSUBSCRIBE: return parseUnsubscribe(b, l, list, this.version, offset);
-        case PACKET_TYPE.UNSUBACK: return parseUnsuback(b, l, list, this.version, offset);
-        case PACKET_TYPE.PINGREQ: return new PacketPingreq(b, l);
-        case PACKET_TYPE.PINGRESP: return new PacketPingresp(b, l);
-        case PACKET_TYPE.DISCONNECT: return parseDisconnect(b, l, list, this.version, offset);
-        case PACKET_TYPE.AUTH: return parseAuth(b, l, list, this.version, offset);
+        case PACKET_TYPE.CONNACK: {
+          const packet = parseConnack(b, l, list, this.version, offset);
+          list.consume(end);
+          return packet;
+        }
+        case PACKET_TYPE.PUBACK: {
+          const packet = parsePuback(b, l, list, this.version, offset);
+          list.consume(end);
+          return packet;
+        }
+        case PACKET_TYPE.PUBREC: {
+          const packet = parsePubrec(b, l, list, this.version, offset);
+          list.consume(end);
+          return packet;
+        }
+        case PACKET_TYPE.PUBREL: {
+          const packet = parsePubrel(b, l, list, this.version, offset);
+          list.consume(end);
+          return packet;
+        }
+        case PACKET_TYPE.PUBCOMP: {
+          const packet = parsePubcomp(b, l, list, this.version, offset);
+          list.consume(end);
+          return packet;
+        }
+        case PACKET_TYPE.SUBSCRIBE: {
+          const packet = parseSubscribe(b, l, list, this.version, offset);
+          list.consume(end);
+          return packet;
+        }
+        case PACKET_TYPE.SUBACK: {
+          const packet = parseSuback(b, l, list, this.version, offset);
+          list.consume(end);
+          return packet;
+        }
+        case PACKET_TYPE.UNSUBSCRIBE: {
+          const packet = parseUnsubscribe(b, l, list, this.version, offset);
+          list.consume(end);
+          return packet;
+        }
+        case PACKET_TYPE.UNSUBACK: {
+          const packet = parseUnsuback(b, l, list, this.version, offset);
+          list.consume(end);
+          return packet;
+        }
+        case PACKET_TYPE.PINGREQ: {
+          const packet = new PacketPingreq(b, l);
+          list.consume(end);
+          return packet;
+        }
+        case PACKET_TYPE.PINGRESP: {
+          const packet = new PacketPingresp(b, l);
+          list.consume(end);
+          return packet;
+        }
+        case PACKET_TYPE.DISCONNECT: {
+          const packet = parseDisconnect(b, l, list, this.version, offset);
+          list.consume(end);
+          return packet;
+        }
+        case PACKET_TYPE.AUTH: {
+          const packet = parseAuth(b, l, list, this.version, offset);
+          list.consume(end);
+          return packet;
+        }
         default: throw ERROR.MALFORMED_PACKET;
       }
     } catch (error) {
