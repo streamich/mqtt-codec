@@ -4,8 +4,9 @@ import {PACKET_TYPE, PROPERTY} from '../enums';
 import {PacketConnect} from '../packets/connect';
 import {PacketConnack} from '../packets/connack';
 import {PacketPublish} from '../packets/publish';
-import { PacketPuback } from '../packets/puback';
-import { PacketPubrec } from '../packets/pubrec';
+import {PacketPuback} from '../packets/puback';
+import {PacketPubrec} from '../packets/pubrec';
+import {PacketSubscribe} from '../packets/subscribe';
 
 it('can instantiate', () => {
   const decoder = new MqttDecoder();
@@ -324,5 +325,157 @@ describe('PUBCOMP', () => {
         ['test', 'test'],
       ],
     });
+  });
+});
+
+describe('SUBSCRIBE', () => {
+  it('parses MQTT 3.1.1 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(Buffer.from([
+      130, 9, // Header (subscribeqos=1length=9)
+      0, 6, // Message ID (6)
+      0, 4, // Topic length,
+      116, 101, 115, 116, // Topic (test)
+      0 // Qos (0)
+    ]));
+    const packet: PacketSubscribe = decoder.parse() as PacketSubscribe;
+    expect(packet.b).toBe(130);
+    expect(packet.l).toBe(9);
+    expect(packet.i).toBe(6);
+    expect(packet.p).toEqual({});
+    expect(packet.s).toMatchObject([
+      {
+        t: 'test',
+        f: 0,
+      }
+    ]);
+  });
+
+  it('can subscribe to one topic using MQTT 5.0', () => {
+    const decoder = new MqttDecoder();
+    decoder.version = 5;
+    decoder.push(Buffer.from([
+      130, 26, // Header (subscribeqos=1length=9)
+      0, 6, // Message ID (6)
+      16, // properties length
+      11, 145, 1, // subscriptionIdentifier
+      38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+      0, 4, // Topic length,
+      116, 101, 115, 116, // Topic (test)
+      24 // settings(qos: 0, noLocal: false, Retain as Published: true, retain handling: 1)
+    ]));
+    const packet: PacketSubscribe = decoder.parse() as PacketSubscribe;
+    expect(packet.b).toBe(130);
+    expect(packet.l).toBe(26);
+    expect(packet.i).toBe(6);
+    expect(packet.p).toEqual({
+      [PROPERTY.SubscriptionIdentifier]: 145,
+      [PROPERTY.UserProperty]: [
+        ['test', 'test'],
+      ],
+    });
+    expect(packet.s.length).toBe(1);
+    expect(packet.s[0].t).toBe('test');
+    expect(packet.s[0].f).toBe(24);
+  });
+
+  it('can subscribe to 3 MQTT 3.1.1 topics', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(Buffer.from([
+      130, 23, // Header (publishqos=1length=9)
+      0, 6, // Message ID (6)
+      0, 4, // Topic length,
+      116, 101, 115, 116, // Topic (test)
+      0, // Qos (0)
+      0, 4, // Topic length
+      117, 101, 115, 116, // Topic (uest)
+      1, // Qos (1)
+      0, 4, // Topic length
+      116, 102, 115, 116, // Topic (tfst)
+      2 // Qos (2)
+    ]));
+    const packet: PacketSubscribe = decoder.parse() as PacketSubscribe;
+    expect(packet).toMatchObject({
+      b: 130,
+      l: 23,
+      i: 6,
+      p: {},
+      s: [
+        {
+          t: 'test',
+          f: 0,
+        },
+        {
+          t: 'uest',
+          f: 1,
+        },
+        {
+          t: 'tfst',
+          f: 2,
+        },
+      ],
+    });
+  });
+
+  it('can subscribe to 3 MQTT 5.0 topics', () => {
+    const decoder = new MqttDecoder();
+    decoder.version = 5;
+    decoder.push(Buffer.from([
+      130, 40, // Header (subscribeqos=1length=9)
+      0, 7, // Message ID (6)
+      16, // properties length
+      11, 145, 1, // subscriptionIdentifier
+      38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+      0, 4, // Topic length,
+      116, 101, 115, 116, // Topic (test)
+      24, // settings(qos: 0, noLocal: false, Retain as Published: true, retain handling: 1)
+      0, 4, // Topic length
+      117, 101, 115, 116, // Topic (uest)
+      1, // Qos (1)
+      0, 4, // Topic length
+      116, 102, 115, 116, // Topic (tfst)
+      6 // Qos (2), No Local: true
+    ]));
+    const packet: PacketSubscribe = decoder.parse() as PacketSubscribe;
+    expect(packet).toMatchObject({
+      b: 130,
+      l: 40,
+      i: 7,
+      p: {
+        [PROPERTY.SubscriptionIdentifier]: 145,
+        [PROPERTY.UserProperty]: [
+          ['test', 'test'],
+        ],
+      },
+      s: [
+        {
+          t: 'test',
+          f: 24,
+        },
+        {
+          t: 'uest',
+          f: 1,
+        },
+        {
+          t: 'tfst',
+          f: 6,
+        },
+      ],
+    });
+
+    expect(packet.s[0].qualityOfService()).toBe(0);
+    expect(packet.s[0].noLocal()).toBe(false);
+    expect(packet.s[0].retainAsPublished()).toBe(true);
+    expect(packet.s[0].retainHandling()).toBe(1);
+
+    expect(packet.s[1].qualityOfService()).toBe(1);
+    expect(packet.s[1].noLocal()).toBe(false);
+    expect(packet.s[1].retainAsPublished()).toBe(false);
+    expect(packet.s[1].retainHandling()).toBe(0);
+
+    expect(packet.s[2].qualityOfService()).toBe(2);
+    expect(packet.s[2].noLocal()).toBe(true);
+    expect(packet.s[2].retainAsPublished()).toBe(false);
+    expect(packet.s[2].retainHandling()).toBe(0);
   });
 });

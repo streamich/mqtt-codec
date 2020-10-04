@@ -7,6 +7,7 @@ import {PacketPuback, parsePuback} from './packets/puback';
 import {PacketPubrec, parsePubrec} from './packets/pubrec';
 import {PacketPubrel, parsePubrel} from './packets/pubrel';
 import {PacketPubcomp, parsePubcomp} from './packets/pubcomp';
+import {PacketSubscribe, parseSubscribe} from './packets/subscribe';
 
 export class MqttDecoder {
   public state: DECODER_STATE = DECODER_STATE.HEADER;
@@ -34,7 +35,7 @@ export class MqttDecoder {
     this.list = new BufferList();
   }
 
-  public parse(): null | PacketConnect | PacketConnack | PacketPublish | PacketPuback | PacketPubrec | PacketPubrel | PacketPubcomp {
+  public parse(): null | PacketConnect | PacketConnack | PacketPublish | PacketPuback | PacketPubrec | PacketPubrel | PacketPubcomp | PacketSubscribe {
     this.parseFixedHeader();
     const data = this.parseVariableData();
     if (!data) return null;
@@ -72,6 +73,10 @@ export class MqttDecoder {
         const packet = parsePubcomp(b, l, data, this.version);
         return packet;
       }
+      case PACKET_TYPE.SUBSCRIBE: {
+        const packet = parseSubscribe(b, l, data, this.version);
+        return packet;
+      }
       default: {
         return null;
       }
@@ -85,7 +90,7 @@ export class MqttDecoder {
     if (length < 2) return;
     this.b = list.readUInt8(0);
     const b1 = list.readUInt8(1);
-    if (b1 ^ 0b10000000) {
+    if (!(b1 & 0b10000000)) {
       list.consume(2);
       this.l = b1 & 0b01111111;
       this.state = DECODER_STATE.DATA;
@@ -93,7 +98,7 @@ export class MqttDecoder {
     }
     if (length < 3) return;
     const b2 = list.readUInt8(2);
-    if (b2 ^ 0b10000000) {
+    if (!(b2 & 0b10000000)) {
       list.consume(3);
       this.l = ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
       this.state = DECODER_STATE.DATA;
@@ -101,7 +106,7 @@ export class MqttDecoder {
     }
     if (length < 4) return;
     const b3 = list.readUInt8(3);
-    if (b3 ^ 0b10000000) {
+    if (!(b3 & 0b10000000)) {
       list.consume(4);
       this.l = ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
       this.state = DECODER_STATE.DATA;
