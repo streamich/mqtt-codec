@@ -598,4 +598,33 @@ describe('UNSUBACK', () => {
     });
     expect(packet.s).toEqual([0, 128]);
   });
+
+  it('parses MQTT 3.1.1 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(Buffer.from([
+      176, 4, // Header
+      0, 8, // Message ID
+      0, 128 // success and error
+    ]));
+    const packet: PacketUnsuback = decoder.parse() as PacketUnsuback;
+    expect(packet.b).toBe(176);
+    expect(packet.l).toBe(4);
+    expect(packet.i).toBe(8);
+    expect(packet.p).toEqual({});
+    expect(packet.s).toEqual([0, 128]);
+  });
+
+  it('parses MQTT 3.1.0 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(Buffer.from([
+      176, 2, // Header
+      0, 8, // Message ID
+    ]));
+    const packet: PacketUnsuback = decoder.parse() as PacketUnsuback;
+    expect(packet.b).toBe(176);
+    expect(packet.l).toBe(2);
+    expect(packet.i).toBe(8);
+    expect(packet.p).toEqual({});
+    expect(packet.s).toEqual([]);
+  });
 });
