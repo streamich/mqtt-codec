@@ -2,7 +2,7 @@ import {BufferList} from './BufferList';
 import {ERROR, PACKET_TYPE} from './enums';
 import {PacketConnack, parseConnack} from './packets/connack';
 import {PacketConnect, parseConnect} from './packets/connect';
-import {PacketPublish, parsePublish} from './packets/publish';
+import {PacketPublish} from './packets/publish';
 import {PacketPuback, parsePuback} from './packets/puback';
 import {PacketPubrec, parsePubrec} from './packets/pubrec';
 import {PacketPubrel, parsePubrel} from './packets/pubrel';
@@ -15,16 +15,13 @@ import {PacketPingreq} from './packets/pingreq';
 import {PacketPingresp} from './packets/pingresp';
 import {PacketDisconnect, parseDisconnect} from './packets/disconnect';
 import {PacketAuth, parseAuth} from './packets/auth';
-import { parseBinary, parseProps } from './util/parse';
-import { Properties } from './types';
+import {parseBinary, parseProps} from './util/parse';
+import {Properties} from './types';
 
 const enum DECODER_STATE {
   HEADER = 0,
   DATA = 1,
 }
-
-const parsers = new Map();
-parsers.set(PACKET_TYPE.PUBLISH, parsePublish);
 
 export class MqttDecoder {
   /** Keeps track of which part message framing are we in. */
@@ -126,15 +123,14 @@ export class MqttDecoder {
 
       if (this.state !== DECODER_STATE.DATA) return;
 
-      const {l: length} = this;
+      const {b, l} = this;
       let offset = this.offset;
-      const end = offset + length;
-      if (list.length < end) return;
+      const packetEndOffset = offset + l;
+      if (list.length < packetEndOffset) return;
 
       this.state = DECODER_STATE.HEADER;
       this.offset = 0;
 
-      const {b, l} = this;
       const type: PACKET_TYPE = (b >> 4) as PACKET_TYPE;
       switch (type) {
         case PACKET_TYPE.PUBLISH: {
@@ -151,80 +147,80 @@ export class MqttDecoder {
             p = props;
             offset += size;
           }
-          const d = list.slice(offset, list.length);
+          const d = list.slice(offset, packetEndOffset);
           const t = topic.toString('utf8');
-          list.consume(end);
+          list.consume(packetEndOffset);
           return new PacketPublish(b, l, t, i, p, d);
         }
         case PACKET_TYPE.CONNECT: {
           const packet = parseConnect(b, l, list, offset);
           this.version = packet.v;
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         case PACKET_TYPE.CONNACK: {
           const packet = parseConnack(b, l, list, this.version, offset);
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         case PACKET_TYPE.PUBACK: {
           const packet = parsePuback(b, l, list, this.version, offset);
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         case PACKET_TYPE.PUBREC: {
           const packet = parsePubrec(b, l, list, this.version, offset);
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         case PACKET_TYPE.PUBREL: {
           const packet = parsePubrel(b, l, list, this.version, offset);
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         case PACKET_TYPE.PUBCOMP: {
           const packet = parsePubcomp(b, l, list, this.version, offset);
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         case PACKET_TYPE.SUBSCRIBE: {
           const packet = parseSubscribe(b, l, list, this.version, offset);
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         case PACKET_TYPE.SUBACK: {
           const packet = parseSuback(b, l, list, this.version, offset);
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         case PACKET_TYPE.UNSUBSCRIBE: {
           const packet = parseUnsubscribe(b, l, list, this.version, offset);
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         case PACKET_TYPE.UNSUBACK: {
           const packet = parseUnsuback(b, l, list, this.version, offset);
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         case PACKET_TYPE.PINGREQ: {
           const packet = new PacketPingreq(b, l);
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         case PACKET_TYPE.PINGRESP: {
           const packet = new PacketPingresp(b, l);
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         case PACKET_TYPE.DISCONNECT: {
           const packet = parseDisconnect(b, l, list, this.version, offset);
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         case PACKET_TYPE.AUTH: {
           const packet = parseAuth(b, l, list, this.version, offset);
-          list.consume(end);
+          list.consume(packetEndOffset);
           return packet;
         }
         default: throw ERROR.MALFORMED_PACKET;
