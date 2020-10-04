@@ -15,6 +15,7 @@ import { PacketPubcomp } from '../packets/pubcomp';
 import { PacketPubrel } from '../packets/pubrel';
 import { PacketPingresp } from '../packets/pingresp';
 import { PacketDisconnect } from '../packets/disconnect';
+import { PacketAuth } from '../packets/auth';
 
 it('can instantiate', () => {
   const decoder = new MqttDecoder();
@@ -747,5 +748,34 @@ describe('DISCONNECT', () => {
     expect(packet).toBeInstanceOf(PacketDisconnect);
     expect(packet.b).toBe(224);
     expect(packet.l).toBe(0);
+  });
+});
+
+describe('AUTH', () => {
+  it('parses MQTT 5.0 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.version = 5;
+    decoder.push(Buffer.from([
+      240, 36, // Header
+      0, // reason code
+      34, // properties length
+      21, 0, 4, 116, 101, 115, 116, // auth method
+      22, 0, 4, 0, 1, 2, 3, // auth data
+      31, 0, 4, 116, 101, 115, 116, // reasonString
+      38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116 // userProperties
+    ]));
+    const packet: PacketAuth = decoder.parse() as PacketAuth;
+    expect(packet).toBeInstanceOf(PacketAuth);
+    expect(packet.b).toBe(240);
+    expect(packet.l).toBe(36);
+    expect(packet.c).toBe(0);
+    expect(packet.p).toEqual({
+      [PROPERTY.AuthenticationMethod]: 'test',
+      [PROPERTY.AuthenticationData]: Buffer.from([0, 1, 2, 3]),
+      [PROPERTY.ReasonString]: 'test',
+      [PROPERTY.UserProperty]: [
+        ['test', 'test'],
+      ],
+    });
   });
 });

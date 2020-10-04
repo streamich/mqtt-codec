@@ -14,6 +14,7 @@ import {PacketUnsuback, parseUnsuback} from './packets/unsuback';
 import {PacketPingreq} from './packets/pingreq';
 import {PacketPingresp} from './packets/pingresp';
 import {PacketDisconnect, parseDisconnect} from './packets/disconnect';
+import {PacketAuth, parseAuth} from './packets/auth';
 
 export class MqttDecoder {
   public state: DECODER_STATE = DECODER_STATE.HEADER;
@@ -56,7 +57,8 @@ export class MqttDecoder {
   | PacketUnsuback
   | PacketPingreq
   | PacketPingresp
-  | PacketDisconnect {
+  | PacketDisconnect
+  | PacketAuth {
     this.parseFixedHeader();
     const data = this.parseVariableData();
     if (!data) return null;
@@ -81,6 +83,7 @@ export class MqttDecoder {
       case PACKET_TYPE.PINGREQ: return new PacketPingreq(b, l);
       case PACKET_TYPE.PINGRESP: return new PacketPingresp(b, l);
       case PACKET_TYPE.DISCONNECT: return parseDisconnect(b, l, data, this.version);
+      case PACKET_TYPE.AUTH: return parseAuth(b, l, data, this.version);
       default: throw ERROR.MALFORMED_PACKET;
     }
   }
