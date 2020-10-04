@@ -17,31 +17,49 @@ import {PacketDisconnect, parseDisconnect} from './packets/disconnect';
 import {PacketAuth, parseAuth} from './packets/auth';
 
 export class MqttDecoder {
+  /** Keeps track of which part message framing are we in. */
   public state: DECODER_STATE = DECODER_STATE.HEADER;
-  public error: null | Error = null;
+
+  /** Buffer which contains all unparsed buffered data. */
   public list = new BufferList();
+
+  /** Current packet first byte. */
   public b: number = 0;
+
+  /** Current packet length. */
   public l: number = 0;
 
-  // MQTT protocol version. Defaults to 4 as that is most popular version now.
+  /**
+   * MQTT protocol version. Defaults to 4 as that is most popular version now.
+   * This version is automatically set to the version received in CONNECT packet.
+   */
   public version: number = 4;
 
-  constructor() {}
-
+  /**
+   * Use this method to push into decoder all new bytes that arrive over the
+   * socket. Each time you push a chunk it can result in zero or more packets
+   * returned by `.parse()` method.
+   * 
+   * @param buf Raw data bytes chunk as received from socket.
+   */
   public push(buf: Buffer) {
     this.list.append(buf);
   }
 
+  /**
+   * Back-pressure of unparsed data.
+   * 
+   * @returns Returns number of bytes of data that has been buffered but not
+   *          parsed yet.
+   */
   public bufferSize() {
     return this.list.length;
   }
 
-  public reset() {
-    this.state = DECODER_STATE.HEADER;
-    this.error = null;
-    this.list = new BufferList();
-  }
-
+  /**
+   * @returns Returns a single parsed packet. If there is not enough data in
+   *          the buffer to parse a packet, returns `null`.
+   */
   public parse():
   | null
   | PacketConnect
@@ -59,36 +77,47 @@ export class MqttDecoder {
   | PacketPingresp
   | PacketDisconnect
   | PacketAuth {
-    this.parseFixedHeader();
-    const data = this.parseVariableData();
-    if (!data) return null;
-    const {b, l} = this;
-    const type: PACKET_TYPE = (b >> 4) as PACKET_TYPE;
-    switch (type) {
-      case PACKET_TYPE.CONNECT: {
-        const packet = parseConnect(b, l, data);
-        this.version = packet.v;
-        return packet;
+    try {
+      this.parseFixedHeader();
+      const data = this.parseVariableData();
+      if (!data) return null;
+      const {b, l} = this;
+      const type: PACKET_TYPE = (b >> 4) as PACKET_TYPE;
+      switch (type) {
+        case PACKET_TYPE.CONNECT: {
+          const packet = parseConnect(b, l, data);
+          this.version = packet.v;
+          return packet;
+        }
+        case PACKET_TYPE.CONNACK: return parseConnack(b, l, data, this.version);
+        case PACKET_TYPE.PUBLISH: return parsePublish(b, l, data, this.version);
+        case PACKET_TYPE.PUBACK: return parsePuback(b, l, data, this.version);
+        case PACKET_TYPE.PUBREC: return parsePubrec(b, l, data, this.version);
+        case PACKET_TYPE.PUBREL: return parsePubrel(b, l, data, this.version);
+        case PACKET_TYPE.PUBCOMP: return parsePubcomp(b, l, data, this.version);
+        case PACKET_TYPE.SUBSCRIBE: return parseSubscribe(b, l, data, this.version);
+        case PACKET_TYPE.SUBACK: return parseSuback(b, l, data, this.version);
+        case PACKET_TYPE.UNSUBSCRIBE: return parseUnsubscribe(b, l, data, this.version);
+        case PACKET_TYPE.UNSUBACK: return parseUnsuback(b, l, data, this.version);
+        case PACKET_TYPE.PINGREQ: return new PacketPingreq(b, l);
+        case PACKET_TYPE.PINGRESP: return new PacketPingresp(b, l);
+        case PACKET_TYPE.DISCONNECT: return parseDisconnect(b, l, data, this.version);
+        case PACKET_TYPE.AUTH: return parseAuth(b, l, data, this.version);
+        default: throw ERROR.MALFORMED_PACKET;
       }
-      case PACKET_TYPE.CONNACK: return parseConnack(b, l, data, this.version);
-      case PACKET_TYPE.PUBLISH: return parsePublish(b, l, data, this.version);
-      case PACKET_TYPE.PUBACK: return parsePuback(b, l, data, this.version);
-      case PACKET_TYPE.PUBREC: return parsePubrec(b, l, data, this.version);
-      case PACKET_TYPE.PUBREL: return parsePubrel(b, l, data, this.version);
-      case PACKET_TYPE.PUBCOMP: return parsePubcomp(b, l, data, this.version);
-      case PACKET_TYPE.SUBSCRIBE: return parseSubscribe(b, l, data, this.version);
-      case PACKET_TYPE.SUBACK: return parseSuback(b, l, data, this.version);
-      case PACKET_TYPE.UNSUBSCRIBE: return parseUnsubscribe(b, l, data, this.version);
-      case PACKET_TYPE.UNSUBACK: return parseUnsuback(b, l, data, this.version);
-      case PACKET_TYPE.PINGREQ: return new PacketPingreq(b, l);
-      case PACKET_TYPE.PINGRESP: return new PacketPingresp(b, l);
-      case PACKET_TYPE.DISCONNECT: return parseDisconnect(b, l, data, this.version);
-      case PACKET_TYPE.AUTH: return parseAuth(b, l, data, this.version);
-      default: throw ERROR.MALFORMED_PACKET;
+    } catch (error) {
+      throw ERROR.MALFORMED_PACKET;
     }
   }
 
-  public parseFixedHeader(): void {
+  /**
+   * Parse a single packet fixed header from the buffer. And advance state to
+   * payload parsing. This method is idempotent, you can call it many times. If
+   * there is not enough data to parse the header, this method will do nothing.
+   * Also, if the decoder currently is not in fixed header parsing state, it
+   * will do nothing.
+   */
+  private parseFixedHeader(): void {
     if (this.state !== DECODER_STATE.HEADER) return;
     const list = this.list;
     const length = list.length;
@@ -124,7 +153,14 @@ export class MqttDecoder {
     this.state = DECODER_STATE.DATA;
   }
 
-  public parseVariableData(): null | BufferList {
+  /**
+   * Parse a single packet variable data and advance the parsing step.
+   * This method is idempotent, you can call it many times. If
+   * there is not enough data to parse the variable payload, this method will
+   * do nothing. Also, if the decoder currently is not in the variable data
+   * parsing state, it will do nothing.
+   */
+  private parseVariableData(): null | BufferList {
     if (this.state !== DECODER_STATE.DATA) return null;
     const {list, l: length} = this;
     if (list.length < length) return null;
