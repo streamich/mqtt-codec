@@ -11,6 +11,7 @@ import {PacketSubscribe, parseSubscribe} from './packets/subscribe';
 import {PacketSuback, parseSuback} from './packets/suback';
 import {PacketUnsubscribe, parseUnsubscribe} from './packets/unsubscribe';
 import {PacketUnsuback, parseUnsuback} from './packets/unsuback';
+import {PacketPingreq, parsePingreq} from './packets/pingreq';
 
 export class MqttDecoder {
   public state: DECODER_STATE = DECODER_STATE.HEADER;
@@ -50,7 +51,8 @@ export class MqttDecoder {
   | PacketSubscribe
   | PacketSuback
   | PacketUnsubscribe
-  | PacketUnsuback {
+  | PacketUnsuback
+  | PacketPingreq {
     this.parseFixedHeader();
     const data = this.parseVariableData();
     if (!data) return null;
@@ -99,6 +101,10 @@ export class MqttDecoder {
       }
       case PACKET_TYPE.UNSUBACK: {
         const packet = parseUnsuback(b, l, data, this.version);
+        return packet;
+      }
+      case PACKET_TYPE.PINGREQ: {
+        const packet = parsePingreq(b, l, data, this.version);
         return packet;
       }
       default: {

@@ -10,6 +10,9 @@ import {PacketSubscribe} from '../packets/subscribe';
 import { PacketSuback } from '../packets/suback';
 import { PacketUnsubscribe } from '../packets/unsubscribe';
 import { PacketUnsuback } from '../packets/unsuback';
+import { PacketPingreq } from '../packets/pingreq';
+import { PacketPubcomp } from '../packets/pubcomp';
+import { PacketPubrel } from '../packets/pubrel';
 
 it('can instantiate', () => {
   const decoder = new MqttDecoder();
@@ -59,6 +62,7 @@ describe('CONNECT', () => {
     const decoder = new MqttDecoder();
     decoder.push(connect);
     const packet: PacketConnect = decoder.parse() as PacketConnect;
+    expect(packet).toBeInstanceOf(PacketConnect);
     expect(packet.v).toBe(5);
     expect(packet.f).toBe(2);
     expect(packet.k).toBe(60);
@@ -73,6 +77,7 @@ describe('CONNECT', () => {
     const decoder = new MqttDecoder();
     decoder.push(connectWithClientId);
     const packet: PacketConnect = decoder.parse() as PacketConnect;
+    expect(packet).toBeInstanceOf(PacketConnect);
     expect(packet.v).toBe(5);
     expect(packet.f).toBe(2);
     expect(packet.k).toBe(60);
@@ -104,6 +109,7 @@ describe('CONNECT', () => {
       112, 97, 115, 115, 119, 111, 114, 100 // Password
     ]));
     const packet: PacketConnect = decoder.parse() as PacketConnect;
+    expect(packet).toBeInstanceOf(PacketConnect);
     expect(packet.v).toBe(3);
     expect(packet.f).toBe(246);
     expect(packet.k).toBe(30);
@@ -120,6 +126,7 @@ describe('CONNACK', () => {
     const decoder = new MqttDecoder();
     decoder.push(connectAck);
     const packet = decoder.parse();
+    expect(packet).toBeInstanceOf(PacketConnack);
     expect(packet!.l).toBe(connectAck.byteLength - 2);
     expect(packet!.type()).toBe(PACKET_TYPE.CONNACK);
     expect(packet!.dup()).toBe(false);
@@ -132,6 +139,7 @@ describe('CONNACK', () => {
     decoder.version = 5;
     decoder.push(connectAck);
     const packet: PacketConnack = decoder.parse() as PacketConnack;
+    expect(packet).toBeInstanceOf(PacketConnack);
     expect(packet.f).toBe(0);
     expect(packet.c).toBe(1);
     expect(packet.p).toEqual({
@@ -146,6 +154,7 @@ describe('PUBLISH', () => {
     const decoder = new MqttDecoder();
     decoder.push(publish3111);
     const packet: PacketPublish = decoder.parse() as PacketPublish;
+    expect(packet).toBeInstanceOf(PacketPublish);
     expect(packet.b).toBe(publish3111.readUInt8(0));
     expect(packet.l).toBe(publish3111.readUInt8(1));
     expect(packet.t).toBe('zibel32/18fe34f1d68e/$name');
@@ -163,6 +172,7 @@ describe('PUBACK', () => {
       0, 2 // Message ID
     ]));
     const packet: PacketPuback = decoder.parse() as PacketPuback;
+    expect(packet).toBeInstanceOf(PacketPuback);
     expect(packet.b).toBe(64);
     expect(packet.l).toBe(2);
     expect(packet.i).toBe(2);
@@ -179,6 +189,7 @@ describe('PUBACK', () => {
       16 // reason code
     ]));
     const packet: PacketPuback = decoder.parse() as PacketPuback;
+    expect(packet).toBeInstanceOf(PacketPuback);
     expect(packet.b).toBe(64);
     expect(packet.l).toBe(3);
     expect(packet.i).toBe(2);
@@ -198,6 +209,7 @@ describe('PUBACK', () => {
       38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116 // userProperties
     ]));
     const packet: PacketPuback = decoder.parse() as PacketPuback;
+    expect(packet).toBeInstanceOf(PacketPuback);
     expect(packet.b).toBe(64);
     expect(packet.l).toBe(24);
     expect(packet.i).toBe(2);
@@ -219,6 +231,7 @@ describe('PUBREC', () => {
       0, 2 // Message ID
     ]));
     const packet: PacketPubrec = decoder.parse() as PacketPubrec;
+    expect(packet).toBeInstanceOf(PacketPubrec);
     expect(packet.b).toBe(80);
     expect(packet.l).toBe(2);
     expect(packet.i).toBe(2);
@@ -238,6 +251,7 @@ describe('PUBREC', () => {
       38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116 // userProperties
     ]));
     const packet: PacketPubrec = decoder.parse() as PacketPubrec;
+    expect(packet).toBeInstanceOf(PacketPubrec);
     expect(packet.b).toBe(80);
     expect(packet.l).toBe(24);
     expect(packet.i).toBe(2);
@@ -258,7 +272,8 @@ describe('PUBREL', () => {
       98, 2, // Header
       0, 2 // Message ID
     ]));
-    const packet: PacketPubrec = decoder.parse() as PacketPubrec;
+    const packet: PacketPubrel = decoder.parse() as PacketPubrel;
+    expect(packet).toBeInstanceOf(PacketPubrel);
     expect(packet.b).toBe(98);
     expect(packet.l).toBe(2);
     expect(packet.i).toBe(2);
@@ -277,7 +292,8 @@ describe('PUBREL', () => {
       31, 0, 4, 116, 101, 115, 116, // reasonString
       38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116 // userProperties
     ]));
-    const packet: PacketPubrec = decoder.parse() as PacketPubrec;
+    const packet: PacketPubrel = decoder.parse() as PacketPubrel;
+    expect(packet).toBeInstanceOf(PacketPubrel);
     expect(packet.b).toBe(98);
     expect(packet.l).toBe(24);
     expect(packet.i).toBe(2);
@@ -298,7 +314,8 @@ describe('PUBCOMP', () => {
       112, 2, // Header
       0, 2 // Message ID
     ]));
-    const packet: PacketPubrec = decoder.parse() as PacketPubrec;
+    const packet: PacketPubcomp = decoder.parse() as PacketPubcomp;
+    expect(packet).toBeInstanceOf(PacketPubcomp);
     expect(packet.b).toBe(112);
     expect(packet.l).toBe(2);
     expect(packet.i).toBe(2);
@@ -317,7 +334,8 @@ describe('PUBCOMP', () => {
       31, 0, 4, 116, 101, 115, 116, // reasonString
       38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116 // userProperties
     ]));
-    const packet: PacketPubrec = decoder.parse() as PacketPubrec;
+    const packet: PacketPubcomp = decoder.parse() as PacketPubcomp;
+    expect(packet).toBeInstanceOf(PacketPubcomp);
     expect(packet.b).toBe(112);
     expect(packet.l).toBe(24);
     expect(packet.i).toBe(2);
@@ -342,6 +360,7 @@ describe('SUBSCRIBE', () => {
       0 // Qos (0)
     ]));
     const packet: PacketSubscribe = decoder.parse() as PacketSubscribe;
+    expect(packet).toBeInstanceOf(PacketSubscribe);
     expect(packet.b).toBe(130);
     expect(packet.l).toBe(9);
     expect(packet.i).toBe(6);
@@ -368,6 +387,7 @@ describe('SUBSCRIBE', () => {
       24 // settings(qos: 0, noLocal: false, Retain as Published: true, retain handling: 1)
     ]));
     const packet: PacketSubscribe = decoder.parse() as PacketSubscribe;
+    expect(packet).toBeInstanceOf(PacketSubscribe);
     expect(packet.b).toBe(130);
     expect(packet.l).toBe(26);
     expect(packet.i).toBe(6);
@@ -398,6 +418,7 @@ describe('SUBSCRIBE', () => {
       2 // Qos (2)
     ]));
     const packet: PacketSubscribe = decoder.parse() as PacketSubscribe;
+    expect(packet).toBeInstanceOf(PacketSubscribe);
     expect(packet).toMatchObject({
       b: 130,
       l: 23,
@@ -440,6 +461,7 @@ describe('SUBSCRIBE', () => {
       6 // Qos (2), No Local: true
     ]));
     const packet: PacketSubscribe = decoder.parse() as PacketSubscribe;
+    expect(packet).toBeInstanceOf(PacketSubscribe);
     expect(packet).toMatchObject({
       b: 130,
       l: 40,
@@ -492,6 +514,7 @@ describe('SUBACK', () => {
       0, 1, 2, 128 // Granted qos (0, 1, 2) and a rejected being 0x80
     ]));
     const packet: PacketSuback = decoder.parse() as PacketSuback;
+    expect(packet).toBeInstanceOf(PacketSuback);
     expect(packet.b).toBe(144);
     expect(packet.l).toBe(6);
     expect(packet.i).toBe(6);
@@ -511,6 +534,7 @@ describe('SUBACK', () => {
       0, 1, 2, 1 // Granted qos (0, 1, 2) and a rejected being 0x80
     ]));
     const packet: PacketSuback = decoder.parse() as PacketSuback;
+    expect(packet).toBeInstanceOf(PacketSuback);
     expect(packet.b).toBe(144);
     expect(packet.l).toBe(27);
     expect(packet.i).toBe(6);
@@ -536,6 +560,7 @@ describe('UNSUBSCRIBE', () => {
       116, 101, 115, 116 // Topic (test)
     ]));
     const packet: PacketUnsubscribe = decoder.parse() as PacketUnsubscribe;
+    expect(packet).toBeInstanceOf(PacketUnsubscribe);
     expect(packet.b).toBe(162);
     expect(packet.l).toBe(14);
     expect(packet.i).toBe(7);
@@ -559,6 +584,7 @@ describe('UNSUBSCRIBE', () => {
       116, 101, 115, 116 // Topic (test)
     ]));
     const packet: PacketUnsubscribe = decoder.parse() as PacketUnsubscribe;
+    expect(packet).toBeInstanceOf(PacketUnsubscribe);
     expect(packet.b).toBe(162);
     expect(packet.l).toBe(28);
     expect(packet.i).toBe(7);
@@ -587,6 +613,7 @@ describe('UNSUBACK', () => {
       0, 128 // success and error
     ]));
     const packet: PacketUnsuback = decoder.parse() as PacketUnsuback;
+    expect(packet).toBeInstanceOf(PacketUnsuback);
     expect(packet.b).toBe(176);
     expect(packet.l).toBe(25);
     expect(packet.i).toBe(8);
@@ -607,6 +634,7 @@ describe('UNSUBACK', () => {
       0, 128 // success and error
     ]));
     const packet: PacketUnsuback = decoder.parse() as PacketUnsuback;
+    expect(packet).toBeInstanceOf(PacketUnsuback);
     expect(packet.b).toBe(176);
     expect(packet.l).toBe(4);
     expect(packet.i).toBe(8);
@@ -621,10 +649,36 @@ describe('UNSUBACK', () => {
       0, 8, // Message ID
     ]));
     const packet: PacketUnsuback = decoder.parse() as PacketUnsuback;
+    expect(packet).toBeInstanceOf(PacketUnsuback);
     expect(packet.b).toBe(176);
     expect(packet.l).toBe(2);
     expect(packet.i).toBe(8);
     expect(packet.p).toEqual({});
     expect(packet.s).toEqual([]);
+  });
+});
+
+describe('PINGREQ', () => {
+  it('parses MQTT 5.0 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.version = 5;
+    decoder.push(Buffer.from([
+      192, 0 // Header
+    ]));
+    const packet: PacketPingreq = decoder.parse() as PacketPingreq;
+    expect(packet).toBeInstanceOf(PacketPingreq);
+    expect(packet.b).toBe(192);
+    expect(packet.l).toBe(0);
+  });
+
+  it('parses MQTT 3.1.1 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(Buffer.from([
+      192, 0 // Header
+    ]));
+    const packet: PacketPingreq = decoder.parse() as PacketPingreq;
+    expect(packet).toBeInstanceOf(PacketPingreq);
+    expect(packet.b).toBe(192);
+    expect(packet.l).toBe(0);
   });
 });
