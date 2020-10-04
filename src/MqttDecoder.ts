@@ -9,6 +9,7 @@ import {PacketPubrel, parsePubrel} from './packets/pubrel';
 import {PacketPubcomp, parsePubcomp} from './packets/pubcomp';
 import {PacketSubscribe, parseSubscribe} from './packets/subscribe';
 import {PacketSuback, parseSuback} from './packets/suback';
+import {PacketUnsubscribe, parseUnsubscribe} from './packets/unsubscribe';
 
 export class MqttDecoder {
   public state: DECODER_STATE = DECODER_STATE.HEADER;
@@ -36,7 +37,7 @@ export class MqttDecoder {
     this.list = new BufferList();
   }
 
-  public parse(): null | PacketConnect | PacketConnack | PacketPublish | PacketPuback | PacketPubrec | PacketPubrel | PacketPubcomp | PacketSubscribe | PacketSuback {
+  public parse(): null | PacketConnect | PacketConnack | PacketPublish | PacketPuback | PacketPubrec | PacketPubrel | PacketPubcomp | PacketSubscribe | PacketSuback | PacketUnsubscribe {
     this.parseFixedHeader();
     const data = this.parseVariableData();
     if (!data) return null;
@@ -77,6 +78,10 @@ export class MqttDecoder {
       }
       case PACKET_TYPE.SUBACK: {
         const packet = parseSuback(b, l, data, this.version);
+        return packet;
+      }
+      case PACKET_TYPE.UNSUBSCRIBE: {
+        const packet = parseUnsubscribe(b, l, data, this.version);
         return packet;
       }
       default: {

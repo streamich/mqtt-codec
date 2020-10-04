@@ -8,6 +8,7 @@ import {PacketPuback} from '../packets/puback';
 import {PacketPubrec} from '../packets/pubrec';
 import {PacketSubscribe} from '../packets/subscribe';
 import { PacketSuback } from '../packets/suback';
+import { PacketUnsubscribe } from '../packets/unsubscribe';
 
 it('can instantiate', () => {
   const decoder = new MqttDecoder();
@@ -519,5 +520,55 @@ describe('SUBACK', () => {
       ],
     });
     expect(packet.s).toEqual([0, 1, 2, 1]);
+  });
+});
+
+describe('UNSUBSCRIBE', () => {
+  it('parses MQTT 3.1.1 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.push(Buffer.from([
+      162, 14,
+      0, 7, // Message ID (7)
+      0, 4, // Topic length
+      116, 102, 115, 116, // Topic (tfst)
+      0, 4, // Topic length,
+      116, 101, 115, 116 // Topic (test)
+    ]));
+    const packet: PacketUnsubscribe = decoder.parse() as PacketUnsubscribe;
+    expect(packet.b).toBe(162);
+    expect(packet.l).toBe(14);
+    expect(packet.i).toBe(7);
+    expect(packet.s).toEqual([
+      'tfst',
+      'test',
+    ]);
+  });
+
+  it('parses MQTT 5.0 packet', () => {
+    const decoder = new MqttDecoder();
+    decoder.version = 5;
+    decoder.push(Buffer.from([
+      162, 28,
+      0, 7, // Message ID (7)
+      13, // properties length
+      38, 0, 4, 116, 101, 115, 116, 0, 4, 116, 101, 115, 116, // userProperties
+      0, 4, // Topic length
+      116, 102, 115, 116, // Topic (tfst)
+      0, 4, // Topic length,
+      116, 101, 115, 116 // Topic (test)
+    ]));
+    const packet: PacketUnsubscribe = decoder.parse() as PacketUnsubscribe;
+    expect(packet.b).toBe(162);
+    expect(packet.l).toBe(28);
+    expect(packet.i).toBe(7);
+    expect(packet.p).toEqual({
+      [PROPERTY.UserProperty]: [
+        ['test', 'test'],
+      ],
+    });
+    expect(packet.s).toEqual([
+      'tfst',
+      'test',
+    ]);
   });
 });
