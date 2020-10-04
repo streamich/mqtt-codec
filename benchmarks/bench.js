@@ -10,7 +10,8 @@ suite
     const decoder = new MqttDecoder();
     for (const name of Object.keys(packets)) {
       decoder.push(Buffer.from(packets[name]));
-      decoder.parse();
+      let packet;
+      while (packet = decoder.parse()) {}
     }
   })
   .add(`mqtt-packet`, function() {
