@@ -1,4 +1,4 @@
-import BufferList from 'bl';
+import {BufferList} from '../BufferList';
 import {ERROR, PROPERTY} from '../enums';
 import {Properties} from '../types';
 

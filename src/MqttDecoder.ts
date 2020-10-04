@@ -1,4 +1,4 @@
-import BufferList from 'bl';
+import {BufferList} from './BufferList';
 import {ERROR, PACKET_TYPE} from './enums';
 import {PacketConnack, parseConnack} from './packets/connack';
 import {PacketConnect, parseConnect} from './packets/connect';

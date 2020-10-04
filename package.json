@@ -33,9 +33,7 @@
     "release": "semantic-release"
   },
   "keywords": [],
-  "dependencies": {
-    "bl": "^4.0.3"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "tslib": "2"
   },

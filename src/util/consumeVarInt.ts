@@ -1,4 +1,4 @@
-import BufferList from 'bl';
+import {BufferList} from '../BufferList';
 
 export const consumeVarInt = (list: BufferList, offset: number): number => {
   const b1 = list.readUInt8(offset);

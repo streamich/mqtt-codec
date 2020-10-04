@@ -1,5 +1,5 @@
 import {MqttDecoder} from '../MqttDecoder';
-import {connect, connectAck, connectWithClientId, publish3111, subscribe, subscribeAck} from './util';
+import {connect, connectAck, connectWithClientId, publish3111} from './util';
 import {ERROR, PACKET_TYPE, PROPERTY} from '../enums';
 import {PacketConnect} from '../packets/connect';
 import {PacketConnack} from '../packets/connack';

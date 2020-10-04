@@ -1,4 +1,4 @@
-import BufferList from 'bl';
+import {BufferList} from '../BufferList';
 import {Packet, PacketHeaderData} from '../packet';
 import {Properties, QoS} from '../types';
 import {parseProps, parseBinary} from '../util/parse';

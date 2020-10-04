@@ -94,12 +94,22 @@ it('can consume bytes in multiple blocks', () => {
   expect(list.readUInt8(0)).toBe(3);
 });
 
-it('consuming out-of-bounds throws error', () => {
+it('consuming out-of-bounds is a no-op', () => {
   const list = new BufferList();
   list.append(Buffer.from([1, 2, 3]));
+  expect(list.length).toBe(3);
   list.consume(1);
+  expect(list.length).toBe(2);
   list.consume(1);
-  expect(() => list.consume(1)).toThrowError();
+  expect(list.length).toBe(1);
+  list.consume(1);
+  expect(list.length).toBe(0);
+  list.consume(1);
+  expect(list.length).toBe(0);
+  list.consume(1);
+  expect(list.length).toBe(0);
+  list.consume(10);
+  expect(list.length).toBe(0);
 });
 
 it('can read ui16', () => {
@@ -126,7 +136,8 @@ it('can read ui16 from adjacent buffers', () => {
   list.consume(1);
   expect(list.readUInt16BE(0)).toBe(256);
   list.consume(1);
-  expect(() => list.consume(1)).toThrowError();
+  list.consume(123);
+  expect(list.length).toBe(0);
 });
 
 it('can read ui32 from adjacent buffers', () => {

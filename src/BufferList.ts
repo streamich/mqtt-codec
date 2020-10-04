@@ -13,7 +13,13 @@ export class BufferList {
   public consume(size: number) {
     this.offset += size;
     this.length -= size;
-    while (this.offset >= this.list[0].length) {
+    if (this.length < 0) {
+      this.list = [];
+      this.offset = 0;
+      this.length = 0;
+      return;
+    }
+    while (this.list.length && this.offset >= this.list[0].length) {
       this.offset -= this.list[0].length;
       this.list.shift();
     }
