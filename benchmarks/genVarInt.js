@@ -6,10 +6,10 @@ const {genVarInt: v4} = require('../es6/util/genVarInt/v4');
 const {genVarInt: v5} = require('../es6/util/genVarInt/v5');
 const {parseVarInt} = require('../es6/util/parse');
 
-const max = 1e5;
+const max = 5e6;
 const suite = new Benchmark.Suite;
 const run = (genVarInt) => {
-  for (let i = 0; i < max; i++) {
+  for (let i = 0; i < max; i += 11) {
     if (i !== parseVarInt(genVarInt(i), 0)[0])
       throw Error('Invalid parsing');
   }

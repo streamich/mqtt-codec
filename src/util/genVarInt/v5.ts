@@ -18,7 +18,7 @@ export const genVarInt = (num: number): Buffer => {
   }
 
   const buf = Buffer.allocUnsafe(4);
-  buf.writeUInt16LE(((0b100000000000000 | (num & 0b011111110000000)) << 1) | (0b10000000 | (num & 0b01111111)), 0);
-  buf.writeUInt16LE((((num >> 21) & 0b01111111) << 8) | (0b10000000 | ((num >> 14) & 0b01111111)), 2);
+  buf.writeUInt32LE((((((num >> 21) & 0b01111111) << 8) | (0b10000000 | ((num >> 14) & 0b01111111))) << 16) |
+    ((0b100000000000000 | (num & 0b011111110000000)) << 1) | (0b10000000 | (num & 0b01111111)), 0);
   return buf;
 };
