@@ -5,6 +5,7 @@ const {genProps: v3} = require('../es6/util/genProps/v3');
 const {genProps: v4} = require('../es6/util/genProps/v4');
 const {genProps: v5} = require('../es6/util/genProps/v5');
 const {genProps: v6} = require('../es6/util/genProps/v6');
+const {genProps: v7} = require('../es6/util/genProps/v7');
 const {parseProps} = require('../es6/util/parse');
 
 const suite = new Benchmark.Suite;
@@ -37,6 +38,7 @@ run(v3);
 run(v4);
 run(v5);
 run(v6);
+run(v7);
 
 suite
   .add(`genProps v1`, function() {
@@ -56,6 +58,9 @@ suite
   })
   .add(`genProps v6`, function() {
     run(v6);
+  })
+  .add(`genProps v7`, function() {
+    run(v7);
   })
 
 suite
