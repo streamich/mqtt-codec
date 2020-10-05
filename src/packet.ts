@@ -28,11 +28,23 @@ export class Packet implements PacketHeaderData {
     return !!(this.b & 0b1000);
   }
 
-  public qos(): QoS {
+  public qualityOfService(): QoS {
     return ((this.b >> 1) & 0b11) as QoS;
   }
 
   public retain(): boolean {
     return !!(this.b & 0b1);
+  }
+
+  public setDup(dup: boolean) {
+    this.b = dup ? (this.b | 0b1000) : (this.b & ~0b1000);
+  }
+
+  public setQualityOfService(qos: QoS) {
+    this.b = (this.b & ~0b110) | ((qos & 0b11) << 1);
+  }
+
+  public setRetain(retain: boolean) {
+    this.b = retain ? (this.b | 0b1) : (this.b & ~0b1);
   }
 }
