@@ -1,46 +1,71 @@
 import { PROPERTY } from '../../enums';
 import {Properties} from '../../types';
-import {genVarInt} from '../genVarInt/v5';
 
 export const genProps = (props: Properties): Buffer => {
   let value: any;
-  let maxBufferSize =
-    4 +                 // Max variable byte size of props.
-    (8 * (1 + 1)) +     // Max one byte fields size.
-    (4 * (1 + 2)) +     // Max two byte fields size.
-    (4 * (1 + 4)) +     // Max four byte fields size.
-    (1 * (1 + 4));      // Max variable int fields size.
+  let size = 0; // Account for props total length first variable length integer.
+
+  // 1 byte properties
+  if (props[PROPERTY.PayloadFormatIndicator] !== undefined) size += 2;
+  if (props[PROPERTY.RequestProblemInformation] !== undefined) size += 2;
+  if (props[PROPERTY.RequestResponseInformation] !== undefined) size += 2;
+  if (props[PROPERTY.MaximumQoS] !== undefined) size += 2;
+  if (props[PROPERTY.RetainAvailable] !== undefined) size += 2;
+  if (props[PROPERTY.WildcardSubscriptionAvailable] !== undefined) size += 2;
+  if (props[PROPERTY.SubscriptionIdentifierAvailable] !== undefined) size += 2;
+  if (props[PROPERTY.SharedSubscriptionAvailable] !== undefined) size += 2;
+
+  // 2 byte properties
+  if (props[PROPERTY.ServerKeepAlive] !== undefined) size += 3;
+  if (props[PROPERTY.ReceiveMaximum] !== undefined) size += 3;
+  if (props[PROPERTY.TopicAliasMaximum] !== undefined) size += 3;
+  if (props[PROPERTY.TopicAlias] !== undefined) size += 3;
+
+  // 4 byte properties
+  if (props[PROPERTY.MessageExpiryInterval] !== undefined) size += 5;
+  if (props[PROPERTY.WillDelayInterval] !== undefined) size += 5;
+  if (props[PROPERTY.SessionExpiryInterval] !== undefined) size += 5;
+  if (props[PROPERTY.MaximumPacketSize] !== undefined) size += 5;
+
+  // Variable length integers
+  value = props[PROPERTY.SubscriptionIdentifier];
+  if (value !== undefined) {
+    if (value < 128) size += 2;
+    else if (value < 16_384) size += 3;
+    else if (value < 2_097_152) size += 4;
+    else size += 5;
+  }
 
   // Binary data
   value = props[PROPERTY.CorrelationData];
-  if (value) maxBufferSize += 1 + 2 + value.length;
+  if (value) size += 1 + 2 + value.length;
   value = props[PROPERTY.AuthenticationData];
-  if (value) maxBufferSize += 1 + 2 + value.length;
+  if (value) size += 1 + 2 + value.length;
 
   // Strings
   value = props[PROPERTY.ContentType];
-  if (value) maxBufferSize += 1 + 2 + Buffer.byteLength(value);
+  if (value) size += 1 + 2 + Buffer.byteLength(value);
   value = props[PROPERTY.ResponseTopic];
-  if (value) maxBufferSize += 1 + 2 + Buffer.byteLength(value);
+  if (value) size += 1 + 2 + Buffer.byteLength(value);
   value = props[PROPERTY.AssignedClientIdentifier];
-  if (value) maxBufferSize += 1 + 2 + Buffer.byteLength(value);
+  if (value) size += 1 + 2 + Buffer.byteLength(value);
   value = props[PROPERTY.AuthenticationMethod];
-  if (value) maxBufferSize += 1 + 2 + Buffer.byteLength(value);
+  if (value) size += 1 + 2 + Buffer.byteLength(value);
   value = props[PROPERTY.ResponseInformation];
-  if (value) maxBufferSize += 1 + 2 + Buffer.byteLength(value);
+  if (value) size += 1 + 2 + Buffer.byteLength(value);
   value = props[PROPERTY.ServerReference];
-  if (value) maxBufferSize += 1 + 2 + Buffer.byteLength(value);
+  if (value) size += 1 + 2 + Buffer.byteLength(value);
   value = props[PROPERTY.ReasonString];
-  if (value) maxBufferSize += 1 + 2 + Buffer.byteLength(value);
+  if (value) size += 1 + 2 + Buffer.byteLength(value);
 
   // User properties
   value = props[PROPERTY.UserProperty];
   if (value)
     for (const [k, v] of value)
-      maxBufferSize += 1 + 2 + Buffer.byteLength(k) + 2 + Buffer.byteLength(v);
+      size += 1 + 2 + Buffer.byteLength(k) + 2 + Buffer.byteLength(v);
 
-  const buf = Buffer.allocUnsafe(maxBufferSize);
-  let offset = 0;
+  let offset = size < 128 ? 1 : size < 16_384 ? 2 : size < 2_097_152 ? 3 : 4;
+  const buf = Buffer.allocUnsafe(size + offset);
 
   // 1 byte properties
   value = props[PROPERTY.PayloadFormatIndicator];
@@ -139,10 +164,22 @@ export const genProps = (props: Properties): Buffer => {
   // Variable length integers
   value = props[PROPERTY.SubscriptionIdentifier];
   if (value !== undefined) {
-    const int = genVarInt(value);
     buf.writeUInt8(PROPERTY.SubscriptionIdentifier, offset++);
-    int.copy(buf, offset);
-    offset += int.length;
+    if (value < 128) {
+      buf.writeUInt8(value, offset++);
+    } else if (value < 16_384) {
+      buf.writeUInt16LE(((value & 0b011111110000000) << 1) | (0b10000000 | (value & 0b01111111)), offset);
+      offset += 2;
+    } else if (value < 2_097_152) {
+      buf.writeUInt16LE(((0b100000000000000 | (value & 0b011111110000000)) << 1) | (0b10000000 | (value & 0b01111111)), offset);
+      offset += 2;
+      buf.writeUInt8((value >> 14) & 0b01111111, offset);
+      offset += 1;
+    } else {
+      buf.writeUInt32LE((((((value >> 21) & 0b01111111) << 8) | (0b10000000 | ((value >> 14) & 0b01111111))) << 16) |
+        ((0b100000000000000 | (value & 0b011111110000000)) << 1) | (0b10000000 | (value & 0b01111111)), offset);
+      offset += 4;
+    }
   }
 
   // Binary data
@@ -245,8 +282,17 @@ export const genProps = (props: Properties): Buffer => {
     }
   }
 
-  return Buffer.concat([
-    genVarInt(offset),
-    buf.slice(0, offset),
-  ]);
+  // Write initial properties variable length integer.
+  if (size < 128)
+    buf.writeUInt8(size, 0);
+  else if (size < 16_384)
+    buf.writeUInt16LE(((size & 0b011111110000000) << 1) | (0b10000000 | (size & 0b01111111)), 0);
+  else if (size < 2_097_152) {
+    buf.writeUInt16LE(((0b100000000000000 | (size & 0b011111110000000)) << 1) | (0b10000000 | (size & 0b01111111)), 0);
+    buf.writeUInt8((size >> 14) & 0b01111111, 2);
+  } else
+    buf.writeUInt32LE((((((size >> 21) & 0b01111111) << 8) | (0b10000000 | ((size >> 14) & 0b01111111))) << 16) |
+      ((0b100000000000000 | (size & 0b011111110000000)) << 1) | (0b10000000 | (size & 0b01111111)), 0);
+
+  return buf;
 };

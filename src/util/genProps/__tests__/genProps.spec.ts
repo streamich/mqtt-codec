@@ -3,10 +3,11 @@ import {genProps as v2} from '../v2';
 import {genProps as v3} from '../v3';
 import {genProps as v4} from '../v4';
 import {genProps as v5} from '../v5';
+import {genProps as v6} from '../v6';
 import {parseProps} from '../../parse';
 import { PROPERTY } from '../../../enums';
 
-const generators = [v1, v2, v3, v4, v5];
+const generators = [v1, v2, v3, v4, v5, v6];
 
 for (let i = 0; i < generators.length; i++) {
   const genProps = generators[i];
@@ -128,6 +129,16 @@ for (let i = 0; i < generators.length; i++) {
       const props = parseProps(buf, 0)[0];
       expect(props).toEqual({
         [PROPERTY.SubscriptionIdentifier]: 2e6,
+      });
+    });
+
+    test('SubscriptionIdentifier with very large value', () => {
+      const buf = genProps({
+        [PROPERTY.SubscriptionIdentifier]: 5e6,
+      });
+      const props = parseProps(buf, 0)[0];
+      expect(props).toEqual({
+        [PROPERTY.SubscriptionIdentifier]: 5e6,
       });
     });
 
