@@ -2,8 +2,7 @@ import { PROPERTY } from '../../enums';
 import {Properties} from '../../types';
 
 export const genProps = (props: Properties): Buffer => {
-  let value: any;
-  let size = 0; // Account for props total length first variable length integer.
+  let size = 0;
 
   // 1 byte properties
   const PayloadFormatIndicator = props[PROPERTY.PayloadFormatIndicator];
@@ -26,6 +25,9 @@ export const genProps = (props: Properties): Buffer => {
   const WillDelayInterval = props[PROPERTY.WillDelayInterval];
   const SessionExpiryInterval = props[PROPERTY.SessionExpiryInterval];
   const MaximumPacketSize = props[PROPERTY.MaximumPacketSize];
+
+  // Variable length integers
+  const SubscriptionIdentifier = props[PROPERTY.SubscriptionIdentifier];
   
   // Binary data
   const CorrelationData = props[PROPERTY.CorrelationData];
@@ -38,6 +40,9 @@ export const genProps = (props: Properties): Buffer => {
   const ResponseInformation = props[PROPERTY.ResponseInformation];
   const ServerReference = props[PROPERTY.ServerReference];
   const ReasonString = props[PROPERTY.ReasonString];
+
+  // User properties
+  const UserProperty = props[PROPERTY.UserProperty];
 
   // 1 byte properties
   if (PayloadFormatIndicator !== undefined) size += 2;
@@ -62,11 +67,10 @@ export const genProps = (props: Properties): Buffer => {
   if (MaximumPacketSize !== undefined) size += 5;
 
   // Variable length integers
-  value = props[PROPERTY.SubscriptionIdentifier];
-  if (value !== undefined) {
-    if (value < 128) size += 2;
-    else if (value < 16_384) size += 3;
-    else if (value < 2_097_152) size += 4;
+  if (SubscriptionIdentifier !== undefined) {
+    if (SubscriptionIdentifier < 128) size += 2;
+    else if (SubscriptionIdentifier < 16_384) size += 3;
+    else if (SubscriptionIdentifier < 2_097_152) size += 4;
     else size += 5;
   }
 
@@ -91,10 +95,11 @@ export const genProps = (props: Properties): Buffer => {
   if (ReasonString !== undefined) size += 1 + 2 + (lenReasonString = Buffer.byteLength(ReasonString));
 
   // User properties
-  value = props[PROPERTY.UserProperty];
-  if (value)
-    for (const [k, v] of value)
-      size += 1 + 2 + Buffer.byteLength(k) + 2 + Buffer.byteLength(v);
+  if (UserProperty) {
+    const len = UserProperty.length;
+    for (let i = 0; i < len; i++)
+      size += 5 + Buffer.byteLength(UserProperty[i][0]) + Buffer.byteLength(UserProperty[i][1]);
+  }
 
   let offset: number = 0;
   let buf: Buffer;
@@ -199,22 +204,21 @@ export const genProps = (props: Properties): Buffer => {
   }
 
   // Variable length integers
-  value = props[PROPERTY.SubscriptionIdentifier];
-  if (value !== undefined) {
+  if (SubscriptionIdentifier !== undefined) {
     buf.writeUInt8(PROPERTY.SubscriptionIdentifier, offset++);
-    if (value < 128) {
-      buf.writeUInt8(value, offset++);
-    } else if (value < 16_384) {
-      buf.writeUInt16LE(((value & 0b011111110000000) << 1) | (0b10000000 | (value & 0b01111111)), offset);
+    if (SubscriptionIdentifier < 128) {
+      buf.writeUInt8(SubscriptionIdentifier, offset++);
+    } else if (SubscriptionIdentifier < 16_384) {
+      buf.writeUInt16LE(((SubscriptionIdentifier & 0b011111110000000) << 1) | (0b10000000 | (SubscriptionIdentifier & 0b01111111)), offset);
       offset += 2;
-    } else if (value < 2_097_152) {
-      buf.writeUInt16LE(((0b100000000000000 | (value & 0b011111110000000)) << 1) | (0b10000000 | (value & 0b01111111)), offset);
+    } else if (SubscriptionIdentifier < 2_097_152) {
+      buf.writeUInt16LE(((0b100000000000000 | (SubscriptionIdentifier & 0b011111110000000)) << 1) | (0b10000000 | (SubscriptionIdentifier & 0b01111111)), offset);
       offset += 2;
-      buf.writeUInt8((value >> 14) & 0b01111111, offset);
+      buf.writeUInt8((SubscriptionIdentifier >> 14) & 0b01111111, offset);
       offset += 1;
     } else {
-      buf.writeUInt32LE((((((value >> 21) & 0b01111111) << 8) | (0b10000000 | ((value >> 14) & 0b01111111))) << 16) |
-        ((0b100000000000000 | (value & 0b011111110000000)) << 1) | (0b10000000 | (value & 0b01111111)), offset);
+      buf.writeUInt32LE((((((SubscriptionIdentifier >> 21) & 0b01111111) << 8) | (0b10000000 | ((SubscriptionIdentifier >> 14) & 0b01111111))) << 16) |
+        ((0b100000000000000 | (SubscriptionIdentifier & 0b011111110000000)) << 1) | (0b10000000 | (SubscriptionIdentifier & 0b01111111)), offset);
       offset += 4;
     }
   }
@@ -288,9 +292,11 @@ export const genProps = (props: Properties): Buffer => {
     offset += lenReasonString;
   }
 
-  value = props[PROPERTY.UserProperty];
-  if (value) {
-    for (const [k, v] of value) {
+  if (UserProperty) {
+    const len = UserProperty.length;
+    for (let i = 0; i < len; i++) {
+      const k = UserProperty[i][0];
+      const v = UserProperty[i][1];
       const kLen = Buffer.byteLength(k);
       const vLen = Buffer.byteLength(v);
       buf.writeUInt8(PROPERTY.UserProperty, offset++);

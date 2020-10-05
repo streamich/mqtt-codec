@@ -14,11 +14,11 @@ const props = {
   '2': 120, // MessageExpiryInterval
   '25': 1, // RequestResponseInformation
   '35': 123, // TopicAlias
-  '8': 'europe/germany/munich/sensors/temperature/room-32/termostats/#', // ResponseTopic
-  '9': Buffer.from('xcxcxcxc-xcxc-xcxc-xcxc-xcxcxcxcxcxc', 'utf8'), // CorrelationData
   '11': 245555, // SubscriptionIdentifier
   '33': 20000, // ReceiveMaximum
   '37': 100, // RetainAvailable
+  '8': 'europe/germany/munich/sensors/temperature/room-32/termostats/#', // ResponseTopic
+  '9': Buffer.from('xcxcxcxc-xcxc-xcxc-xcxc-xcxcxcxcxcxc', 'utf8'), // CorrelationData
   '38': [ // UserProperty
     [ 'Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD' ],
     [ 'Ip-Address', '0.0.0.0' ],
