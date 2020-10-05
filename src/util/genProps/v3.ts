@@ -2,29 +2,57 @@ import { PROPERTY } from '../../enums';
 import {Properties} from '../../types';
 import {genVarInt} from '../genVarInt/v5';
 
+const maxFixedIntBufSize = (8 * (1 + 1)) + (4 * (1 + 2)) + (4 * (1 + 4));
+const fixedIntBuf = Buffer.allocUnsafe(maxFixedIntBufSize);
+
 export const genProps = (props: Properties): Buffer => {
   const bytes: number[] = [];
   const buffers: Buffer[] = [];
   let buffersSize: number = 0;
   let value: any;
+  let offset: number = 0;
 
   // 1 byte properties
-  if (props[PROPERTY.PayloadFormatIndicator] !== undefined)
-    bytes.push(PROPERTY.PayloadFormatIndicator, props[PROPERTY.PayloadFormatIndicator]!);
-  if (props[PROPERTY.RequestProblemInformation] !== undefined)
-    bytes.push(PROPERTY.RequestProblemInformation, props[PROPERTY.RequestProblemInformation]!);
-  if (props[PROPERTY.RequestResponseInformation] !== undefined)
-    bytes.push(PROPERTY.RequestResponseInformation, props[PROPERTY.RequestResponseInformation]!);
-  if (props[PROPERTY.MaximumQoS] !== undefined)
-    bytes.push(PROPERTY.MaximumQoS, props[PROPERTY.MaximumQoS]!);
-  if (props[PROPERTY.RetainAvailable] !== undefined)
-    bytes.push(PROPERTY.RetainAvailable, props[PROPERTY.RetainAvailable]!);
-  if (props[PROPERTY.WildcardSubscriptionAvailable] !== undefined)
-    bytes.push(PROPERTY.WildcardSubscriptionAvailable, props[PROPERTY.WildcardSubscriptionAvailable]!);
-  if (props[PROPERTY.SubscriptionIdentifierAvailable] !== undefined)
-    bytes.push(PROPERTY.SubscriptionIdentifierAvailable, props[PROPERTY.SubscriptionIdentifierAvailable]!);
-  if (props[PROPERTY.SharedSubscriptionAvailable] !== undefined)
-    bytes.push(PROPERTY.SharedSubscriptionAvailable, props[PROPERTY.SharedSubscriptionAvailable]!);
+  value = props[PROPERTY.PayloadFormatIndicator];
+  if (value !== undefined) {
+    fixedIntBuf.writeUInt16BE((PROPERTY.PayloadFormatIndicator << 8) + value, offset);
+    offset += 2;
+  }
+  value = props[PROPERTY.RequestProblemInformation];
+  if (value !== undefined) {
+    fixedIntBuf.writeUInt16BE((PROPERTY.RequestProblemInformation << 8) + value, offset);
+    offset += 2;
+  }
+  value = props[PROPERTY.RequestResponseInformation];
+  if (value !== undefined) {
+    fixedIntBuf.writeUInt16BE((PROPERTY.RequestResponseInformation << 8) + value, offset);
+    offset += 2;
+  }
+  value = props[PROPERTY.MaximumQoS];
+  if (value !== undefined) {
+    fixedIntBuf.writeUInt16BE((PROPERTY.MaximumQoS << 8) + value, offset);
+    offset += 2;
+  }
+  value = props[PROPERTY.RetainAvailable];
+  if (value !== undefined) {
+    fixedIntBuf.writeUInt16BE((PROPERTY.RetainAvailable << 8) + value, offset);
+    offset += 2;
+  }
+  value = props[PROPERTY.WildcardSubscriptionAvailable];
+  if (value !== undefined) {
+    fixedIntBuf.writeUInt16BE((PROPERTY.WildcardSubscriptionAvailable << 8) + value, offset);
+    offset += 2;
+  }
+  value = props[PROPERTY.SubscriptionIdentifierAvailable];
+  if (value !== undefined) {
+    fixedIntBuf.writeUInt16BE((PROPERTY.SubscriptionIdentifierAvailable << 8) + value, offset);
+    offset += 2;
+  }
+  value = props[PROPERTY.SharedSubscriptionAvailable];
+  if (value !== undefined) {
+    fixedIntBuf.writeUInt16BE((PROPERTY.SharedSubscriptionAvailable << 8) + value, offset);
+    offset += 2;
+  }
 
   // 2 byte properties
   if (props[PROPERTY.ServerKeepAlive] !== undefined)
@@ -177,7 +205,8 @@ export const genProps = (props: Properties): Buffer => {
   }
 
   return Buffer.concat([
-    genVarInt(bytes.length + buffersSize),
+    genVarInt(bytes.length + buffersSize + offset),
+    fixedIntBuf.slice(0, offset),
     Buffer.from(bytes),
     ...buffers,
   ]);

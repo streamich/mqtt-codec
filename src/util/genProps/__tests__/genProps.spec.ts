@@ -1,8 +1,11 @@
 import {genProps as v1} from '../v1';
-import {parseProps, parseVarInt} from '../../parse';
+import {genProps as v2} from '../v2';
+import {genProps as v3} from '../v3';
+import {genProps as v4} from '../v4';
+import {parseProps} from '../../parse';
 import { PROPERTY } from '../../../enums';
 
-const generators = [v1];
+const generators = [v1, v2, v3, v4];
 
 for (let i = 0; i < generators.length; i++) {
   const genProps = generators[i];
@@ -238,6 +241,66 @@ for (let i = 0; i < generators.length; i++) {
           ['key', 'value-1'],
           ['key', 'value-2'],
           ['key', 'value-3'],
+        ],
+      });
+    });
+
+    test('one property from each type', () => {
+      const buf = genProps({
+        [PROPERTY.RetainAvailable]: 100,
+        [PROPERTY.ReceiveMaximum]: 20000,
+        [PROPERTY.MessageExpiryInterval]: 120,
+        [PROPERTY.SubscriptionIdentifier]: 245555,
+        [PROPERTY.CorrelationData]: Buffer.from('xcxcxcxc-xcxc-xcxc-xcxc-xcxcxcxcxcxc', 'utf8'),
+        [PROPERTY.ResponseTopic]: 'europe/germany/munich/sensors/temperature/room-32/termostats/#',
+        [PROPERTY.UserProperty]: [
+          ['Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD'],
+          ['Ip-Address', '0.0.0.0'],
+          ['Cache', 'no-cache'],
+        ],
+      });
+      const props = parseProps(buf, 0)[0];
+      expect(props).toEqual({
+        [PROPERTY.RetainAvailable]: 100,
+        [PROPERTY.ReceiveMaximum]: 20000,
+        [PROPERTY.MessageExpiryInterval]: 120,
+        [PROPERTY.SubscriptionIdentifier]: 245555,
+        [PROPERTY.CorrelationData]: Buffer.from('xcxcxcxc-xcxc-xcxc-xcxc-xcxcxcxcxcxc', 'utf8'),
+        [PROPERTY.ResponseTopic]: 'europe/germany/munich/sensors/temperature/room-32/termostats/#',
+        [PROPERTY.UserProperty]: [
+          ['Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD'],
+          ['Ip-Address', '0.0.0.0'],
+          ['Cache', 'no-cache'],
+        ],
+      });
+    });
+
+    test('hard-coded keys', () => {
+      const buf = genProps({
+        '2': 120, // MessageExpiryInterval
+        '8': 'europe/germany/munich/sensors/temperature/room-32/termostats/#', // ResponseTopic
+        '9': Buffer.from('xcxcxcxc-xcxc-xcxc-xcxc-xcxcxcxcxcxc', 'utf8'), // CorrelationData
+        '11': 245555, // SubscriptionIdentifier
+        '33': 20000, // ReceiveMaximum
+        '37': 100, // RetainAvailable
+        '38': [ // UserProperty
+          [ 'Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD' ],
+          [ 'Ip-Address', '0.0.0.0' ],
+          [ 'Cache', 'no-cache' ],
+        ],
+      });
+      const props = parseProps(buf, 0)[0];
+      expect(props).toEqual({
+        [PROPERTY.RetainAvailable]: 100,
+        [PROPERTY.ReceiveMaximum]: 20000,
+        [PROPERTY.MessageExpiryInterval]: 120,
+        [PROPERTY.SubscriptionIdentifier]: 245555,
+        [PROPERTY.CorrelationData]: Buffer.from('xcxcxcxc-xcxc-xcxc-xcxc-xcxcxcxcxcxc', 'utf8'),
+        [PROPERTY.ResponseTopic]: 'europe/germany/munich/sensors/temperature/room-32/termostats/#',
+        [PROPERTY.UserProperty]: [
+          ['Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD'],
+          ['Ip-Address', '0.0.0.0'],
+          ['Cache', 'no-cache'],
         ],
       });
     });

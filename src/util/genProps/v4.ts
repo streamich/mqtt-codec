@@ -99,80 +99,71 @@ export const genProps = (props: Properties): Buffer => {
   // Strings
   value = props[PROPERTY.ContentType];
   if (value !== undefined) {
-    const buf = Buffer.allocUnsafe(3);
-    const buf2 = Buffer.from(value, 'utf8');
+    const buf = Buffer.from('123' + value, 'utf8');
     buf.writeUInt8(PROPERTY.ContentType);
-    buf.writeUInt16BE(buf2.length, 1);
-    buffers.push(buf, buf2);
-    buffersSize += 3 + buf2.length;
+    buf.writeUInt16BE(buf.length - 3, 1);
+    buffers.push(buf);
+    buffersSize += buf.length;
   }
   value = props[PROPERTY.ResponseTopic];
   if (value !== undefined) {
-    const buf = Buffer.allocUnsafe(3);
-    const buf2 = Buffer.from(value, 'utf8');
+    const buf = Buffer.from('123' + value, 'utf8');
     buf.writeUInt8(PROPERTY.ResponseTopic);
-    buf.writeUInt16BE(buf2.length, 1);
-    buffers.push(buf, buf2);
-    buffersSize += 3 + buf2.length;
+    buf.writeUInt16BE(buf.length - 3, 1);
+    buffers.push(buf);
+    buffersSize += buf.length;
   }
   value = props[PROPERTY.AssignedClientIdentifier];
   if (value !== undefined) {
-    const buf = Buffer.allocUnsafe(3);
-    const buf2 = Buffer.from(value, 'utf8');
+    const buf = Buffer.from('123' + value, 'utf8');
     buf.writeUInt8(PROPERTY.AssignedClientIdentifier);
-    buf.writeUInt16BE(buf2.length, 1);
-    buffers.push(buf, buf2);
-    buffersSize += 3 + buf2.length;
+    buf.writeUInt16BE(buf.length - 3, 1);
+    buffers.push(buf);
+    buffersSize += buf.length;
   }
   value = props[PROPERTY.AuthenticationMethod];
   if (value !== undefined) {
-    const buf = Buffer.allocUnsafe(3);
-    const buf2 = Buffer.from(value, 'utf8');
+    const buf = Buffer.from('123' + value, 'utf8');
     buf.writeUInt8(PROPERTY.AuthenticationMethod);
-    buf.writeUInt16BE(buf2.length, 1);
-    buffers.push(buf, buf2);
-    buffersSize += 3 + buf2.length;
+    buf.writeUInt16BE(buf.length - 3, 1);
+    buffers.push(buf);
+    buffersSize += buf.length;
   }
   value = props[PROPERTY.ResponseInformation];
   if (value !== undefined) {
-    const buf = Buffer.allocUnsafe(3);
-    const buf2 = Buffer.from(value, 'utf8');
+    const buf = Buffer.from('123' + value, 'utf8');
     buf.writeUInt8(PROPERTY.ResponseInformation);
-    buf.writeUInt16BE(buf2.length, 1);
-    buffers.push(buf, buf2);
-    buffersSize += 3 + buf2.length;
+    buf.writeUInt16BE(buf.length - 3, 1);
+    buffers.push(buf);
+    buffersSize += buf.length;
   }
   value = props[PROPERTY.ServerReference];
   if (value !== undefined) {
-    const buf = Buffer.allocUnsafe(3);
-    const buf2 = Buffer.from(value, 'utf8');
+    const buf = Buffer.from('123' + value, 'utf8');
     buf.writeUInt8(PROPERTY.ServerReference);
-    buf.writeUInt16BE(buf2.length, 1);
-    buffers.push(buf, buf2);
-    buffersSize += 3 + buf2.length;
+    buf.writeUInt16BE(buf.length - 3, 1);
+    buffers.push(buf);
+    buffersSize += buf.length;
   }
   value = props[PROPERTY.ReasonString];
   if (value !== undefined) {
-    const buf = Buffer.allocUnsafe(3);
-    const buf2 = Buffer.from(value, 'utf8');
+    const buf = Buffer.from('123' + value, 'utf8');
     buf.writeUInt8(PROPERTY.ReasonString);
-    buf.writeUInt16BE(buf2.length, 1);
-    buffers.push(buf, buf2);
-    buffersSize += 3 + buf2.length;
+    buf.writeUInt16BE(buf.length - 3, 1);
+    buffers.push(buf);
+    buffersSize += buf.length;
   }
 
   value = props[PROPERTY.UserProperty];
   if (value) {
     for (const [k, v] of value) {
-      const buf1 = Buffer.allocUnsafe(3);
-      const buf2 = Buffer.from(k, 'utf8');
-      const buf3 = Buffer.allocUnsafe(2);
-      const buf4 = Buffer.from(v, 'utf8');
-      buf1.writeUInt8(PROPERTY.UserProperty);
-      buf1.writeUInt16BE(buf2.length, 1);
-      buf3.writeUInt16BE(buf4.length, 0);
-      buffers.push(buf1, buf2, buf3, buf4);
-      buffersSize += 3 + buf2.length + 2 + buf4.length;
+      const bufKey = Buffer.from('123' + k, 'utf8');
+      const bugValue = Buffer.from('12' + v, 'utf8');
+      bufKey.writeUInt8(PROPERTY.UserProperty);
+      bufKey.writeUInt16BE(bufKey.length - 3, 1);
+      bugValue.writeUInt16BE(bugValue.length - 2, 0);
+      buffers.push(bufKey, bugValue);
+      buffersSize += bufKey.length + bugValue.length;
     }
   }
 
