@@ -1,8 +1,9 @@
 ```
 node benchmarks/genProps.js 
-genVarInt v1 x 168,167 ops/sec ±1.71% (92 runs sampled)
-genVarInt v2 x 152,954 ops/sec ±0.46% (96 runs sampled)
-genVarInt v3 x 163,043 ops/sec ±1.30% (87 runs sampled)
-genVarInt v4 x 190,957 ops/sec ±0.75% (95 runs sampled)
-Fastest is genVarInt v4
+genVarInt v1 x 167,511 ops/sec ±2.04% (92 runs sampled)
+genVarInt v2 x 153,804 ops/sec ±0.47% (95 runs sampled)
+genVarInt v3 x 161,557 ops/sec ±1.42% (90 runs sampled)
+genVarInt v4 x 194,822 ops/sec ±0.64% (93 runs sampled)
+genVarInt v5 x 240,989 ops/sec ±1.14% (93 runs sampled)
+Fastest is genVarInt v5
 ```
