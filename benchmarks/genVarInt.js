@@ -3,6 +3,7 @@ const {genVarInt: v1} = require('../es6/util/genVarInt/v1');
 const {genVarInt: v2} = require('../es6/util/genVarInt/v2');
 const {genVarInt: v3} = require('../es6/util/genVarInt/v3');
 const {genVarInt: v4} = require('../es6/util/genVarInt/v4');
+const {genVarInt: v5} = require('../es6/util/genVarInt/v5');
 const {parseVarInt} = require('../es6/util/parse');
 
 const max = 1e5;
@@ -26,6 +27,9 @@ suite
   })
   .add(`genVarInt v4`, function() {
     run(v4);
+  })
+  .add(`genVarInt v5`, function() {
+    run(v5);
   })
 
 suite
