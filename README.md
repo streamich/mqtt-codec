@@ -18,8 +18,8 @@ Run main benchmark, which creates a single parser and runs various packet types 
 
 ```
 node benchmarks/bench.js 
-mqtt-codec x 49,683 ops/sec ±1.17% (93 runs sampled)
-mqtt-packet x 11,073 ops/sec ±1.39% (90 runs sampled)
+mqtt-codec x 55,148 ops/sec ±1.72% (90 runs sampled)
+mqtt-packet x 10,535 ops/sec ±1.55% (92 runs sampled)
 Fastest is mqtt-codec
 ```
 

@@ -33,6 +33,7 @@ export interface Properties {
 }
 
 export interface BufferLike {
+  length: number;
   readUInt8(offset: number): number;
   readUInt16BE(offset: number): number;
   readUInt32BE(offset: number): number;

@@ -1,6 +1,5 @@
-import {BufferList} from '../BufferList';
 import {Packet, PacketHeaderData} from '../packet';
-import {Properties} from '../types';
+import {BufferLike, Properties} from '../types';
 import {parseProps} from '../util/parse';
 
 export interface PacketAuthData extends PacketHeaderData {
@@ -21,8 +20,8 @@ export class PacketAuth extends Packet implements PacketAuthData {
   }
 }
 
-export const parseAuth = (b: number, l: number, data: BufferList, version: number, offset: number): PacketAuth => {
-  const c: number = data.readUInt8(offset);
-  const [p] = parseProps(data, offset + 1);
+export const parseAuth = (b: number, l: number, buf: BufferLike, version: number): PacketAuth => {
+  const c: number = buf.readUInt8(0);
+  const [p] = parseProps(buf, 1);
   return new PacketAuth(b, l, c, p);
 };

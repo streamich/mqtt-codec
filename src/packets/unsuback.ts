@@ -1,6 +1,5 @@
-import {BufferList} from '../BufferList';
 import {Packet, PacketHeaderData} from '../packet';
-import {Properties} from '../types';
+import {BufferLike, Properties} from '../types';
 import {parseProps} from '../util/parse';
 
 export interface PacketUnsubackData extends PacketHeaderData {
@@ -24,19 +23,20 @@ export class PacketUnsuback extends Packet implements PacketUnsubackData {
   }
 }
 
-export const parseUnsuback = (b: number, l: number, data: BufferList, version: number, offset: number): PacketUnsuback => {
-  const i = data.readUInt16BE(offset);
+export const parseUnsuback = (b: number, l: number, buf: BufferLike, version: number): PacketUnsuback => {
+  let offset = 0;
+  const i = buf.readUInt16BE(offset);
   offset += 2;
   let p: Properties = {};
   if (version === 5) {
-    const [props, size] = parseProps(data, offset);
+    const [props, size] = parseProps(buf, offset);
       p = props;
       offset += size;
   }
-  const len = data.length;
+  const len = buf.length;
   const s: number[] = [];
   while (offset < len) {
-    s.push(data.readUInt8(offset++));
+    s.push(buf.readUInt8(offset++));
   }
   return new PacketUnsuback(b, l, i, p, s);
 };

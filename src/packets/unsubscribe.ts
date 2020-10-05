@@ -1,6 +1,5 @@
-import {BufferList} from '../BufferList';
 import {Packet, PacketHeaderData} from '../packet';
-import {Properties} from '../types';
+import {BufferLike, Properties} from '../types';
 import {parseBinary, parseProps} from '../util/parse';
 
 export interface PacketUnsubscribeData extends PacketHeaderData {
@@ -24,19 +23,20 @@ export class PacketUnsubscribe extends Packet implements PacketUnsubscribeData {
   }
 }
 
-export const parseUnsubscribe = (b: number, l: number, data: BufferList, version: number, offset: number): PacketUnsubscribe => {
-  const i = data.readUInt16BE(offset);
+export const parseUnsubscribe = (b: number, l: number, buf: BufferLike, version: number): PacketUnsubscribe => {
+  let offset = 0;
+  const i = buf.readUInt16BE(offset);
   offset += 2;
   let p: Properties = {};
   if (version === 5) {
-    const [props, size] = parseProps(data, offset);
+    const [props, size] = parseProps(buf, offset);
       p = props;
       offset += size;
   }
-  const len = data.length;
+  const len = buf.length;
   const s: string[] = [];
   while (offset < len) {
-    const topic = parseBinary(data, offset);
+    const topic = parseBinary(buf, offset);
     s.push(topic.toString('utf8'));
     offset += 2 + topic.byteLength;
   }

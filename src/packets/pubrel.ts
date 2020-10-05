@@ -1,6 +1,5 @@
-import {BufferList} from '../BufferList';
 import {Packet, PacketHeaderData} from '../packet';
-import {Properties} from '../types';
+import {BufferLike, Properties} from '../types';
 import {parseProps} from '../util/parse';
 
 export interface PacketPubrelData extends PacketHeaderData {
@@ -24,14 +23,14 @@ export class PacketPubrel extends Packet implements PacketPubrelData {
   }
 }
 
-export const parsePubrel = (b: number, l: number, data: BufferList, version: number, offset: number): PacketPubrel => {
-  const i = data.readUInt16BE(offset);
+export const parsePubrel = (b: number, l: number, data: BufferLike, version: number): PacketPubrel => {
+  const i = data.readUInt16BE(0);
   let c: number = 0;
   let p: Properties = {};
   if (version === 5) {
-    c = data.readUInt8(offset + 2);
+    c = data.readUInt8(2);
     if (l > 3) {
-      [p] = parseProps(data, offset + 3);
+      [p] = parseProps(data, 3);
     }
   }
   return new PacketPubrel(b, l, i, c, p);

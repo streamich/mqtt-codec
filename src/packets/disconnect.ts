@@ -1,6 +1,5 @@
-import {BufferList} from '../BufferList';
 import {Packet, PacketHeaderData} from '../packet';
-import {Properties} from '../types';
+import {BufferLike, Properties} from '../types';
 import {parseProps} from '../util/parse';
 
 export interface PacketDisconnectData extends PacketHeaderData {
@@ -21,13 +20,13 @@ export class PacketDisconnect extends Packet implements PacketDisconnectData {
   }
 }
 
-export const parseDisconnect = (b: number, l: number, data: BufferList, version: number, offset: number): PacketDisconnect => {
+export const parseDisconnect = (b: number, l: number, buf: BufferLike, version: number): PacketDisconnect => {
   let c: number = 0;
   let p: Properties = {};
   if (version === 5) {
-    c = data.readUInt8(offset);
+    c = buf.readUInt8(0);
     if (l > 1) {
-      [p] = parseProps(data, offset + 1);
+      [p] = parseProps(buf, 1);
     }
   }
   return new PacketDisconnect(b, l, c, p);

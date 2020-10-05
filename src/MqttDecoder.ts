@@ -131,30 +131,31 @@ export class MqttDecoder {
       this.state = DECODER_STATE.HEADER;
       this.offset = 0;
 
+      const buf = list.slice(offset, offset + l);
+      list.consume(packetEndOffset);
+
       const type: PACKET_TYPE = (b >> 4) as PACKET_TYPE;
       switch (type) {
         case PACKET_TYPE.PUBLISH: {
-          const topic = parseBinary(list, offset);
+          let offset = 0;
+          const topic = parseBinary(buf, offset);
           offset += 2 + topic.byteLength;
           let i: number = 0;
           if (((b >> 1) & 0b11) > 0) {
-            i = list.readUInt16BE(offset);
+            i = buf.readUInt16BE(offset);
             offset += 2;
           }
           let p: Properties = {};
           if (this.version === 5) {
-            const [props, size] = parseProps(list, offset);
+            const [props, size] = parseProps(buf, offset);
             p = props;
             offset += size;
           }
-          const d = list.slice(offset, packetEndOffset);
+          const d = buf.slice(offset, packetEndOffset);
           const t = topic.toString('utf8');
-          list.consume(packetEndOffset);
           return new PacketPublish(b, l, t, i, p, d);
         }
         case PACKET_TYPE.CONNECT: {
-          const buf = list.slice(offset, offset + l);
-          list.consume(packetEndOffset);
           offset = 2 + buf.readUInt16BE(0); // Skip "MQTT" or "MQIsdp" protocol name.
           const v = buf.readUInt8(offset++);
           const f = buf.readUInt8(offset++);
@@ -201,71 +202,19 @@ export class MqttDecoder {
           this.version = packet.v;
           return packet;
         }
-        case PACKET_TYPE.CONNACK: {
-          const packet = parseConnack(b, l, list, this.version, offset);
-          list.consume(packetEndOffset);
-          return packet;
-        }
-        case PACKET_TYPE.PUBACK: {
-          const packet = parsePuback(b, l, list, this.version, offset);
-          list.consume(packetEndOffset);
-          return packet;
-        }
-        case PACKET_TYPE.PUBREC: {
-          const packet = parsePubrec(b, l, list, this.version, offset);
-          list.consume(packetEndOffset);
-          return packet;
-        }
-        case PACKET_TYPE.PUBREL: {
-          const packet = parsePubrel(b, l, list, this.version, offset);
-          list.consume(packetEndOffset);
-          return packet;
-        }
-        case PACKET_TYPE.PUBCOMP: {
-          const packet = parsePubcomp(b, l, list, this.version, offset);
-          list.consume(packetEndOffset);
-          return packet;
-        }
-        case PACKET_TYPE.SUBSCRIBE: {
-          const packet = parseSubscribe(b, l, list, this.version, offset);
-          list.consume(packetEndOffset);
-          return packet;
-        }
-        case PACKET_TYPE.SUBACK: {
-          const packet = parseSuback(b, l, list, this.version, offset);
-          list.consume(packetEndOffset);
-          return packet;
-        }
-        case PACKET_TYPE.UNSUBSCRIBE: {
-          const packet = parseUnsubscribe(b, l, list, this.version, offset);
-          list.consume(packetEndOffset);
-          return packet;
-        }
-        case PACKET_TYPE.UNSUBACK: {
-          const packet = parseUnsuback(b, l, list, this.version, offset);
-          list.consume(packetEndOffset);
-          return packet;
-        }
-        case PACKET_TYPE.PINGREQ: {
-          const packet = new PacketPingreq(b, l);
-          list.consume(packetEndOffset);
-          return packet;
-        }
-        case PACKET_TYPE.PINGRESP: {
-          const packet = new PacketPingresp(b, l);
-          list.consume(packetEndOffset);
-          return packet;
-        }
-        case PACKET_TYPE.DISCONNECT: {
-          const packet = parseDisconnect(b, l, list, this.version, offset);
-          list.consume(packetEndOffset);
-          return packet;
-        }
-        case PACKET_TYPE.AUTH: {
-          const packet = parseAuth(b, l, list, this.version, offset);
-          list.consume(packetEndOffset);
-          return packet;
-        }
+        case PACKET_TYPE.CONNACK: return parseConnack(b, l, buf, this.version);
+        case PACKET_TYPE.PUBACK: return parsePuback(b, l, buf, this.version);
+        case PACKET_TYPE.PUBREC: return parsePubrec(b, l, buf, this.version);
+        case PACKET_TYPE.PUBREL: return parsePubrel(b, l, buf, this.version);
+        case PACKET_TYPE.PUBCOMP: return parsePubcomp(b, l, buf, this.version);
+        case PACKET_TYPE.SUBSCRIBE: return parseSubscribe(b, l, buf, this.version);
+        case PACKET_TYPE.SUBACK: return parseSuback(b, l, buf, this.version);
+        case PACKET_TYPE.UNSUBSCRIBE: return parseUnsubscribe(b, l, buf, this.version);
+        case PACKET_TYPE.UNSUBACK: return parseUnsuback(b, l, buf, this.version);
+        case PACKET_TYPE.PINGREQ: return new PacketPingreq(b, l);
+        case PACKET_TYPE.PINGRESP: return new PacketPingresp(b, l);
+        case PACKET_TYPE.DISCONNECT: return parseDisconnect(b, l, buf, this.version);
+        case PACKET_TYPE.AUTH: return parseAuth(b, l, buf, this.version);
         default: throw ERROR.MALFORMED_PACKET;
       }
     } catch (error) {

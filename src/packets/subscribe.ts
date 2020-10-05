@@ -1,6 +1,5 @@
-import {BufferList} from '../BufferList';
 import {Packet, PacketHeaderData} from '../packet';
-import {Properties} from '../types';
+import {BufferLike, Properties} from '../types';
 import {parseBinary, parseProps} from '../util/parse';
 
 export interface PacketSubscribeData extends PacketHeaderData {
@@ -51,21 +50,22 @@ export class Subscription implements SubscriptionData {
   }
 }
 
-export const parseSubscribe = (b: number, l: number, data: BufferList, version: number, offset: number): PacketSubscribe => {
-  const i = data.readUInt16BE(offset);
+export const parseSubscribe = (b: number, l: number, buf: BufferLike, version: number): PacketSubscribe => {
+  let offset = 0;
+  const i = buf.readUInt16BE(offset);
   offset += 2;
   let p: Properties = {};
   if (version === 5) {
-    const [props, size] = parseProps(data, offset);
+    const [props, size] = parseProps(buf, offset);
       p = props;
       offset += size;
   }
-  const len = data.length;
+  const len = buf.length;
   const s: Subscription[] = [];
   while (offset < len) {
-    const topic = parseBinary(data, offset);
+    const topic = parseBinary(buf, offset);
     offset += 2 + topic.byteLength;
-    const f = data.readUInt8(offset);
+    const f = buf.readUInt8(offset);
     offset++;
     s.push(new Subscription(topic.toString('utf8'), f));
   }
