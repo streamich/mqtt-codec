@@ -25,7 +25,8 @@ export interface Properties {
   [PROPERTY.TopicAlias]?: number;
   [PROPERTY.MaximumQoS]?: number;
   [PROPERTY.RetainAvailable]?: number;
-  [PROPERTY.UserProperty]?: [name: string, value: string][];
+  /** A flat list of key-value pair 2-tuples. */
+  [PROPERTY.UserProperty]?: string[];
   [PROPERTY.MaximumPacketSize]?: number;
   [PROPERTY.WildcardSubscriptionAvailable]?: number;
   [PROPERTY.SubscriptionIdentifierAvailable]?: number;

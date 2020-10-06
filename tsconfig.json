@@ -30,6 +30,8 @@
   "exclude": [
     "node_modules",
     "lib",
+    "es6",
+    "esm",
     "src/__tests__",
     "src/**/__tests__/**/*.*",
     "src/**/__mocks__/**/*.*",

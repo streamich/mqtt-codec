@@ -1,5 +1,5 @@
 import {BufferList} from './BufferList';
-import {ERROR, PACKET_TYPE} from './enums';
+import {REASON, PACKET_TYPE} from './enums';
 import {PacketConnack, parseConnack} from './packets/connack';
 import {PacketConnect} from './packets/connect';
 import {PacketPublish} from './packets/publish';
@@ -15,7 +15,8 @@ import {PacketPingreq} from './packets/pingreq';
 import {PacketPingresp} from './packets/pingresp';
 import {PacketDisconnect, parseDisconnect} from './packets/disconnect';
 import {PacketAuth, parseAuth} from './packets/auth';
-import {parseBinary, parseProps} from './util/parse';
+import {parseBinary} from './util/parse';
+import {parseProps} from './util/parseProps';
 import {Properties} from './types';
 
 const enum DECODER_STATE {
@@ -67,7 +68,7 @@ export class MqttDecoder {
 
   /**
    * @returns Returns a single parsed packet. If there is not enough data in
-   *          the buffer to parse a packet, returns `null`.
+   *          the buffer to parse a packet, returns `undefined`.
    */
   public parse():
   | undefined
@@ -166,8 +167,9 @@ export class MqttDecoder {
           // const f = (ui32 & 0xFF0000) >> 16;
           // const k = (ui32 & 0xFFFF);
           // offset += 4;
+          const isV5 = v === 5;
           let p: Properties = {};
-          if (v === 5) {
+          if (isV5) {
             const [props, propsSize] = parseProps(buf, offset);
             p = props;
             offset += propsSize;
@@ -175,9 +177,9 @@ export class MqttDecoder {
           const clientId = parseBinary(buf, offset);
           const id = clientId.toString('utf8');
           offset += 2 + clientId.byteLength;
-          const packet = new PacketConnect(b, l, v, f, k, p, id);
+          const packet = new PacketConnect(b, l, v, f, k, p, id)
           if (packet.willFlag()) {
-            if (v === 5) {
+            if (isV5) {
               const [props, propsSize] = parseProps(buf, offset);
               packet.wp = props;
               offset += propsSize;
@@ -215,10 +217,10 @@ export class MqttDecoder {
         case PACKET_TYPE.PINGRESP: return new PacketPingresp(b, l);
         case PACKET_TYPE.DISCONNECT: return parseDisconnect(b, l, buf, this.version);
         case PACKET_TYPE.AUTH: return parseAuth(b, l, buf, this.version);
-        default: throw ERROR.MALFORMED_PACKET;
+        default: throw REASON.MalformedPacket;
       }
     } catch (error) {
-      throw ERROR.MALFORMED_PACKET;
+      throw REASON.ProtocolError;
     }
   }
 }
