@@ -1,18 +1,29 @@
-import {Packet, PacketHeaderData} from '../packet';
-import {BufferLike, Properties} from '../types';
-import {parseBinary} from '../util/parse';
-import {parseProps} from '../util/parseProps';
+import {PACKET_TYPE} from '../../enums';
+import {Packet, PacketHeaderData} from '../../packet';
+import {BufferLike, Properties} from '../../types';
+import {parseBinary} from '../../util/parse';
+import {parseProps} from '../../util/parseProps';
+import {encodeUnsubscribe} from './encodeUnsubscribe';
 
 export interface PacketUnsubscribeData extends PacketHeaderData {
   /** Packet Identifier. */
   i: number;
   /** Properties. */
   p: Properties;
-  /** UNSUBSCRIBE Payload. */
+  /** Topic Filters. */
   s: string[];
 }
 
 export class PacketUnsubscribe extends Packet implements PacketUnsubscribeData {
+  /**
+   * @param i Packet Identifier
+   * @param p Properties
+   * @param s Topic Filters
+   */
+  static create(i: number, p: Properties, s: string[]): PacketUnsubscribe {
+    return new PacketUnsubscribe(PACKET_TYPE.UNSUBSCRIBE << 4, 0, i, p, s);
+  }
+
   constructor(
     b: number,
     l: number,
@@ -21,6 +32,10 @@ export class PacketUnsubscribe extends Packet implements PacketUnsubscribeData {
     public s: string[],
   ) {
     super(b, l);
+  }
+
+  public toBuffer(version: number): Buffer {
+    return encodeUnsubscribe(this, version);
   }
 }
 
