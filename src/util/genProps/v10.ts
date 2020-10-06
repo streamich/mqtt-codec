@@ -1,6 +1,8 @@
 import {PROPERTY} from '../../enums';
 import {Properties} from '../../types';
 
+const byteLength = Buffer.byteLength.bind(Buffer);
+
 export const genProps = (props: Properties): Buffer => {
   let size = 0;
 
@@ -80,25 +82,27 @@ export const genProps = (props: Properties): Buffer => {
 
   // Strings
   let lenContentType: number = 0;
-  if (ContentType !== undefined) size += 1 + 2 + (lenContentType = Buffer.byteLength(ContentType));
+  if (ContentType !== undefined) size += 1 + 2 + (lenContentType = byteLength(ContentType));
   let lenResponseTopic: number = 0;
-  if (ResponseTopic !== undefined) size += 1 + 2 + (lenResponseTopic = Buffer.byteLength(ResponseTopic));
+  if (ResponseTopic !== undefined) size += 1 + 2 + (lenResponseTopic = byteLength(ResponseTopic));
   let lenAssignedClientIdentifier: number = 0;
-  if (AssignedClientIdentifier !== undefined) size += 1 + 2 + (lenAssignedClientIdentifier = Buffer.byteLength(AssignedClientIdentifier));
+  if (AssignedClientIdentifier !== undefined) size += 1 + 2 + (lenAssignedClientIdentifier = byteLength(AssignedClientIdentifier));
   let lenAuthenticationMethod: number = 0;
-  if (AuthenticationMethod !== undefined) size += 1 + 2 + (lenAuthenticationMethod = Buffer.byteLength(AuthenticationMethod));
+  if (AuthenticationMethod !== undefined) size += 1 + 2 + (lenAuthenticationMethod = byteLength(AuthenticationMethod));
   let lenResponseInformation: number = 0;
-  if (ResponseInformation !== undefined) size += 1 + 2 + (lenResponseInformation = Buffer.byteLength(ResponseInformation));
+  if (ResponseInformation !== undefined) size += 1 + 2 + (lenResponseInformation = byteLength(ResponseInformation));
   let lenServerReference: number = 0;
-  if (ServerReference !== undefined) size += 1 + 2 + (lenServerReference = Buffer.byteLength(ServerReference));
+  if (ServerReference !== undefined) size += 1 + 2 + (lenServerReference = byteLength(ServerReference));
   let lenReasonString: number = 0;
-  if (ReasonString !== undefined) size += 1 + 2 + (lenReasonString = Buffer.byteLength(ReasonString));
+  if (ReasonString !== undefined) size += 1 + 2 + (lenReasonString = byteLength(ReasonString));
 
   // User properties
   if (UserProperty) {
     const len = UserProperty.length;
-    for (let i = 0; i < len; i++)
-      size += 5 + Buffer.byteLength(UserProperty[i][0]) + Buffer.byteLength(UserProperty[i][1]);
+    for (let i = 0; i < len; i++) {
+      const tuple = UserProperty[i];
+      size += 5 + byteLength(tuple[0]) + byteLength(tuple[1]);
+    }
   }
 
   let offset: number = 0;
@@ -125,96 +129,99 @@ export const genProps = (props: Properties): Buffer => {
       ((0b100000000000000 | (size & 0b011111110000000)) << 1) | (0b10000000 | (size & 0b01111111)), 0);
   }
 
+  const writeUInt8 = buf.writeUInt8.bind(buf);
+  const writeUInt16BE = buf.writeUInt16BE.bind(buf);
+
   // 1 byte properties
   if (PayloadFormatIndicator !== undefined) {
-    buf.writeUInt8(PROPERTY.PayloadFormatIndicator, offset++);
-    buf.writeUInt8(PayloadFormatIndicator, offset++);
+    writeUInt8(PROPERTY.PayloadFormatIndicator, offset++);
+    writeUInt8(PayloadFormatIndicator, offset++);
   }
   if (RequestProblemInformation !== undefined) {
-    buf.writeUInt8(PROPERTY.RequestProblemInformation, offset++);
-    buf.writeUInt8(RequestProblemInformation, offset++);
+    writeUInt8(PROPERTY.RequestProblemInformation, offset++);
+    writeUInt8(RequestProblemInformation, offset++);
   }
   if (RequestResponseInformation !== undefined) {
-    buf.writeUInt8(PROPERTY.RequestResponseInformation, offset++);
-    buf.writeUInt8(RequestResponseInformation, offset++);
+    writeUInt8(PROPERTY.RequestResponseInformation, offset++);
+    writeUInt8(RequestResponseInformation, offset++);
   }
   if (MaximumQoS !== undefined) {
-    buf.writeUInt8(PROPERTY.MaximumQoS, offset++);
-    buf.writeUInt8(MaximumQoS, offset++);
+    writeUInt8(PROPERTY.MaximumQoS, offset++);
+    writeUInt8(MaximumQoS, offset++);
   }
   if (RetainAvailable !== undefined) {
-    buf.writeUInt8(PROPERTY.RetainAvailable, offset++);
-    buf.writeUInt8(RetainAvailable, offset++);
+    writeUInt8(PROPERTY.RetainAvailable, offset++);
+    writeUInt8(RetainAvailable, offset++);
   }
   if (WildcardSubscriptionAvailable !== undefined) {
-    buf.writeUInt8(PROPERTY.WildcardSubscriptionAvailable, offset++);
-    buf.writeUInt8(WildcardSubscriptionAvailable, offset++);
+    writeUInt8(PROPERTY.WildcardSubscriptionAvailable, offset++);
+    writeUInt8(WildcardSubscriptionAvailable, offset++);
   }
   if (SubscriptionIdentifierAvailable !== undefined) {
-    buf.writeUInt8(PROPERTY.SubscriptionIdentifierAvailable, offset++);
-    buf.writeUInt8(SubscriptionIdentifierAvailable, offset++);
+    writeUInt8(PROPERTY.SubscriptionIdentifierAvailable, offset++);
+    writeUInt8(SubscriptionIdentifierAvailable, offset++);
   }
   if (SharedSubscriptionAvailable !== undefined) {
-    buf.writeUInt8(PROPERTY.SharedSubscriptionAvailable, offset++);
-    buf.writeUInt8(SharedSubscriptionAvailable, offset++);
+    writeUInt8(PROPERTY.SharedSubscriptionAvailable, offset++);
+    writeUInt8(SharedSubscriptionAvailable, offset++);
   }
 
   // 2 byte properties
   if (ServerKeepAlive !== undefined) {
-    buf.writeUInt8(PROPERTY.ServerKeepAlive, offset++);
-    buf.writeUInt16BE(ServerKeepAlive, offset);
+    writeUInt8(PROPERTY.ServerKeepAlive, offset++);
+    writeUInt16BE(ServerKeepAlive, offset);
     offset += 2;
   }
   if (ReceiveMaximum !== undefined) {
-    buf.writeUInt8(PROPERTY.ReceiveMaximum, offset++);
-    buf.writeUInt16BE(ReceiveMaximum, offset);
+    writeUInt8(PROPERTY.ReceiveMaximum, offset++);
+    writeUInt16BE(ReceiveMaximum, offset);
     offset += 2;
   }
   if (TopicAliasMaximum !== undefined) {
-    buf.writeUInt8(PROPERTY.TopicAliasMaximum, offset++);
-    buf.writeUInt16BE(TopicAliasMaximum, offset);
+    writeUInt8(PROPERTY.TopicAliasMaximum, offset++);
+    writeUInt16BE(TopicAliasMaximum, offset);
     offset += 2;
   }
   if (TopicAlias !== undefined) {
-    buf.writeUInt8(PROPERTY.TopicAlias, offset++);
-    buf.writeUInt16BE(TopicAlias, offset);
+    writeUInt8(PROPERTY.TopicAlias, offset++);
+    writeUInt16BE(TopicAlias, offset);
     offset += 2;
   }
 
   // 4 byte properties
   if (MessageExpiryInterval !== undefined) {
-    buf.writeUInt8(PROPERTY.MessageExpiryInterval, offset++);
+    writeUInt8(PROPERTY.MessageExpiryInterval, offset++);
     buf.writeUInt32BE(MessageExpiryInterval, offset);
     offset += 4;
   }
   if (WillDelayInterval !== undefined) {
-    buf.writeUInt8(PROPERTY.WillDelayInterval, offset++);
+    writeUInt8(PROPERTY.WillDelayInterval, offset++);
     buf.writeUInt32BE(WillDelayInterval, offset);
     offset += 4;
   }
   if (SessionExpiryInterval !== undefined) {
-    buf.writeUInt8(PROPERTY.SessionExpiryInterval, offset++);
+    writeUInt8(PROPERTY.SessionExpiryInterval, offset++);
     buf.writeUInt32BE(SessionExpiryInterval, offset);
     offset += 4;
   }
   if (MaximumPacketSize !== undefined) {
-    buf.writeUInt8(PROPERTY.MaximumPacketSize, offset++);
+    writeUInt8(PROPERTY.MaximumPacketSize, offset++);
     buf.writeUInt32BE(MaximumPacketSize, offset);
     offset += 4;
   }
 
   // Variable length integers
   if (SubscriptionIdentifier !== undefined) {
-    buf.writeUInt8(PROPERTY.SubscriptionIdentifier, offset++);
+    writeUInt8(PROPERTY.SubscriptionIdentifier, offset++);
     if (SubscriptionIdentifier < 128) {
-      buf.writeUInt8(SubscriptionIdentifier, offset++);
+      writeUInt8(SubscriptionIdentifier, offset++);
     } else if (SubscriptionIdentifier < 16_384) {
       buf.writeUInt16LE(((SubscriptionIdentifier & 0b011111110000000) << 1) | (0b10000000 | (SubscriptionIdentifier & 0b01111111)), offset);
       offset += 2;
     } else if (SubscriptionIdentifier < 2_097_152) {
       buf.writeUInt16LE(((0b100000000000000 | (SubscriptionIdentifier & 0b011111110000000)) << 1) | (0b10000000 | (SubscriptionIdentifier & 0b01111111)), offset);
       offset += 2;
-      buf.writeUInt8((SubscriptionIdentifier >> 14) & 0b01111111, offset);
+      writeUInt8((SubscriptionIdentifier >> 14) & 0b01111111, offset);
       offset += 1;
     } else {
       buf.writeUInt32LE((((((SubscriptionIdentifier >> 21) & 0b01111111) << 8) | (0b10000000 | ((SubscriptionIdentifier >> 14) & 0b01111111))) << 16) |
@@ -226,16 +233,16 @@ export const genProps = (props: Properties): Buffer => {
   // Binary data
   if (CorrelationData) {
     const len = CorrelationData.length;
-    buf.writeUInt8(PROPERTY.CorrelationData, offset++);
-    buf.writeUInt16BE(len, offset);
+    writeUInt8(PROPERTY.CorrelationData, offset++);
+    writeUInt16BE(len, offset);
     offset += 2;
     CorrelationData.copy(buf, offset);
     offset += len;
   }
   if (AuthenticationData) {
     const len = AuthenticationData.length;
-    buf.writeUInt8(PROPERTY.AuthenticationData, offset++);
-    buf.writeUInt16BE(len, offset);
+    writeUInt8(PROPERTY.AuthenticationData, offset++);
+    writeUInt16BE(len, offset);
     offset += 2;
     AuthenticationData.copy(buf, offset);
     offset += len;
@@ -243,50 +250,50 @@ export const genProps = (props: Properties): Buffer => {
 
   // Strings
   if (ContentType !== undefined) {
-    buf.writeUInt8(PROPERTY.ContentType, offset++);
-    buf.writeUInt16BE(lenContentType, offset);
+    writeUInt8(PROPERTY.ContentType, offset++);
+    writeUInt16BE(lenContentType, offset);
     offset += 2;
     buf.write(ContentType, offset);
     offset += lenContentType;
   }
   if (ResponseTopic !== undefined) {
-    buf.writeUInt8(PROPERTY.ResponseTopic, offset++);
-    buf.writeUInt16BE(lenResponseTopic, offset);
+    writeUInt8(PROPERTY.ResponseTopic, offset++);
+    writeUInt16BE(lenResponseTopic, offset);
     offset += 2;
     buf.write(ResponseTopic, offset);
     offset += lenResponseTopic;
   }
   if (AssignedClientIdentifier !== undefined) {
-    buf.writeUInt8(PROPERTY.AssignedClientIdentifier, offset++);
-    buf.writeUInt16BE(lenAssignedClientIdentifier, offset);
+    writeUInt8(PROPERTY.AssignedClientIdentifier, offset++);
+    writeUInt16BE(lenAssignedClientIdentifier, offset);
     offset += 2;
     buf.write(AssignedClientIdentifier, offset);
     offset += lenAssignedClientIdentifier;
   }
   if (AuthenticationMethod !== undefined) {
-    buf.writeUInt8(PROPERTY.AuthenticationMethod, offset++);
-    buf.writeUInt16BE(lenAuthenticationMethod, offset);
+    writeUInt8(PROPERTY.AuthenticationMethod, offset++);
+    writeUInt16BE(lenAuthenticationMethod, offset);
     offset += 2;
     buf.write(AuthenticationMethod, offset);
     offset += lenAuthenticationMethod;
   }
   if (ResponseInformation !== undefined) {
-    buf.writeUInt8(PROPERTY.ResponseInformation, offset++);
-    buf.writeUInt16BE(lenResponseInformation, offset);
+    writeUInt8(PROPERTY.ResponseInformation, offset++);
+    writeUInt16BE(lenResponseInformation, offset);
     offset += 2;
     buf.write(ResponseInformation, offset);
     offset += lenResponseInformation;
   }
   if (ServerReference !== undefined) {
-    buf.writeUInt8(PROPERTY.ServerReference, offset++);
-    buf.writeUInt16BE(lenServerReference, offset);
+    writeUInt8(PROPERTY.ServerReference, offset++);
+    writeUInt16BE(lenServerReference, offset);
     offset += 2;
     buf.write(ServerReference, offset);
     offset += lenServerReference;
   }
   if (ReasonString !== undefined) {
-    buf.writeUInt8(PROPERTY.ReasonString, offset++);
-    buf.writeUInt16BE(lenReasonString, offset);
+    writeUInt8(PROPERTY.ReasonString, offset++);
+    writeUInt16BE(lenReasonString, offset);
     offset += 2;
     buf.write(ReasonString, offset);
     offset += lenReasonString;
@@ -297,14 +304,14 @@ export const genProps = (props: Properties): Buffer => {
     for (let i = 0; i < len; i++) {
       const k = UserProperty[i][0];
       const v = UserProperty[i][1];
-      const kLen = Buffer.byteLength(k);
-      const vLen = Buffer.byteLength(v);
-      buf.writeUInt8(PROPERTY.UserProperty, offset++);
-      buf.writeUInt16BE(kLen, offset);
+      const kLen = byteLength(k);
+      const vLen = byteLength(v);
+      writeUInt8(PROPERTY.UserProperty, offset++);
+      writeUInt16BE(kLen, offset);
       offset += 2;
       buf.write(k + '__' + v, offset);
       offset += kLen;
-      buf.writeUInt16BE(vLen, offset);
+      writeUInt16BE(vLen, offset);
       offset += 2 + vLen;
     }
   }

@@ -6,10 +6,12 @@ import {genProps as v5} from '../v5';
 import {genProps as v6} from '../v6';
 import {genProps as v7} from '../v7';
 import {genProps as v8} from '../v8';
+import {genProps as v9} from '../v9';
+import {genProps as v10} from '../v10';
 import {parseProps} from '../../parse';
 import { PROPERTY } from '../../../enums';
 
-const generators = [v1, v2, v3, v4, v5, v6, v7, v8];
+const generators = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10];
 
 for (let i = 0; i < generators.length; i++) {
   const genProps = generators[i];
