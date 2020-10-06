@@ -2,6 +2,7 @@ import { PACKET_TYPE } from '../../enums';
 import {Packet, PacketHeaderData} from '../../packet';
 import {BufferLike, Properties} from '../../types';
 import {parseProps} from '../../util/parse';
+import {encodeConnack} from './encodeConnack';
 
 export interface PacketConnackData extends PacketHeaderData {
   /** Connect Acknowledge Flags. */
@@ -43,9 +44,9 @@ export class PacketConnack extends Packet implements PacketConnackData {
     this.f = sessionPresent ? (this.f | 0b1) : (this.f & ~0b1);
   }
 
-  // public toBuffer(): Buffer {
-
-  // }
+  public toBuffer(version: number): Buffer {
+    return encodeConnack(this, version);
+  }
 }
 
 export const parseConnack = (b: number, l: number, data: BufferLike, version: number): PacketConnack => {

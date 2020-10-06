@@ -67,7 +67,7 @@ export class MqttDecoder {
 
   /**
    * @returns Returns a single parsed packet. If there is not enough data in
-   *          the buffer to parse a packet, returns `null`.
+   *          the buffer to parse a packet, returns `undefined`.
    */
   public parse():
   | undefined
