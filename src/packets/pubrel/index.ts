@@ -1,6 +1,8 @@
-import {Packet, PacketHeaderData} from '../packet';
-import {BufferLike, Properties} from '../types';
-import {parseProps} from '../util/parseProps';
+import {PACKET_TYPE} from '../../enums';
+import {Packet, PacketHeaderData} from '../../packet';
+import {BufferLike, Properties} from '../../types';
+import {parseProps} from '../../util/parseProps';
+import {encodePuback} from '../puback/encodePuback';
 
 export interface PacketPubrelData extends PacketHeaderData {
   /** Packet Identifier. */
@@ -12,6 +14,15 @@ export interface PacketPubrelData extends PacketHeaderData {
 }
 
 export class PacketPubrel extends Packet implements PacketPubrelData {
+  /**
+   * @param i Packet Identifier
+   * @param c Reason Code
+   * @param p Properties
+   */
+  static create(i: number, c: number, p: Properties) {
+    return new PacketPubrel(PACKET_TYPE.PUBREL << 4, 0, i, c, p);
+  }
+
   constructor(
     b: number,
     l: number,
@@ -20,6 +31,10 @@ export class PacketPubrel extends Packet implements PacketPubrelData {
     public p: Properties,
   ) {
     super(b, l);
+  }
+
+  public toBuffer(version: number) {
+    return encodePuback(this, version);
   }
 }
 
