@@ -1,7 +1,7 @@
-import {PacketSuback} from '.';
+import {PacketSubackData} from '.';
 import {genProps} from '../../util/genProps';
 
-export const encodeSuback = (packet: PacketSuback, version: number): Buffer => {
+export const encodeSuback = (packet: PacketSubackData, version: number): Buffer => {
   const {b, i, p, s} = packet;
   const isV5 = version === 5;
   const props = isV5 ? genProps(p) : null;
