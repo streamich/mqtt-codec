@@ -1,17 +1,17 @@
-import {genProps} from '../../../util/genProps/v7';
+import {getPropsLen} from '../../../util/genProps/getPropsLen';
+import {writeProps} from '../../../util/genProps/writeProps';
 import {PacketPublish} from '../../publish';
 
 export const encodePublish = (packet: PacketPublish, version: number): Buffer => {
   const payload = packet.d;
   const lenTopic = Buffer.byteLength(packet.t);
   const isQosHigh = packet.qualityOfService() > 0;
-  const isV5 = version === 5;
-  const props = isV5 ? genProps(packet.p) : null;
-  const propsLength = isV5 ? props!.length : 0;
+  const emitProps = version === 5;
+  const propsSize = emitProps ? getPropsLen(packet.p) : 0;
   const remainingLength: number =
     2 + lenTopic +            // topic length
     (isQosHigh ? 2 : 0) +     // packet ID
-    propsLength +             // properties
+    propsSize +               // properties
     payload.length;           // payload length
   const remainingLengthSize = remainingLength < 128 ? 1 : remainingLength < 16_384 ? 2 : remainingLength < 2_097_152 ? 3 : 4;
   const bufferLength = 1 + remainingLengthSize + remainingLength;
@@ -53,9 +53,9 @@ export const encodePublish = (packet: PacketPublish, version: number): Buffer =>
     offset += 2;
   }
 
-  if (isV5) {
-    props!.copy(buf, offset);
-    offset += propsLength;
+  if (emitProps) {
+    writeProps(packet.p!, buf, offset, propsSize);
+    offset += propsSize;
   }
 
   payload.copy(buf, offset);

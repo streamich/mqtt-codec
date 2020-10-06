@@ -1,13 +1,14 @@
 import {genProps} from '../../../util/genProps/v7';
 import {PacketPublish} from '../../publish';
 
-export const encodePublish = (packet: PacketPublish, version: number): Buffer => {
+// NOTE: MQTT 5.0 only!
+
+export const encodePublish = (packet: PacketPublish): Buffer => {
   const payload = packet.d;
   const lenTopic = Buffer.byteLength(packet.t);
   const isQosHigh = packet.qualityOfService() > 0;
-  const isV5 = version === 5;
-  const props = isV5 ? genProps(packet.p) : null;
-  const propsLength = isV5 ? props!.length : 0;
+  const props = genProps(packet.p);
+  const propsLength = props.length;
   const remainingLength: number =
     2 + lenTopic +            // topic length
     (isQosHigh ? 2 : 0) +     // packet ID
@@ -17,8 +18,6 @@ export const encodePublish = (packet: PacketPublish, version: number): Buffer =>
   const bufferLength = 1 + remainingLengthSize + remainingLength;
   const buf = Buffer.allocUnsafe(bufferLength);
   packet.l = remainingLength;
-  
-  buf.writeUInt8(packet.b, 0);
 
   let offset = 1;
 
@@ -43,23 +42,18 @@ export const encodePublish = (packet: PacketPublish, version: number): Buffer =>
       break;
   }
 
-  buf.writeUInt16BE(lenTopic, offset);
-  offset += 2;
-  buf.write(packet.t, offset);
-  offset += lenTopic;
+  const offsetTopic = offset;
+  const offsetQos = 2 + offsetTopic + lenTopic;
+  const offsetProps = offsetQos + (isQosHigh ? 2 : 0);
+  const offsetPayload = offsetProps + propsLength;
 
-  if (isQosHigh) {
-    buf.writeUInt16BE(packet.i, offset);
-    offset += 2;
-  }
+  if (isQosHigh) buf.writeUInt16BE(packet.i, offsetQos);
 
-  if (isV5) {
-    props!.copy(buf, offset);
-    offset += propsLength;
-  }
-
-  payload.copy(buf, offset);
-  // offset += payload.length;
+  buf.writeUInt8(packet.b, 0);
+  buf.writeUInt16BE(lenTopic, offsetTopic);
+  buf.write(packet.t, offsetTopic + 2);
+  props!.copy(buf, offsetProps);
+  payload.copy(buf, offsetPayload);
 
   return buf;
 }
