@@ -1,7 +1,9 @@
-import {Packet, PacketHeaderData} from '../packet';
-import {BufferLike, Properties} from '../types';
-import {parseBinary} from '../util/parse';
-import {parseProps} from '../util/parseProps';
+import {PACKET_TYPE} from '../../enums';
+import {Packet, PacketHeaderData} from '../../packet';
+import {BufferLike, Properties, QoS} from '../../types';
+import {parseBinary} from '../../util/parse';
+import {parseProps} from '../../util/parseProps';
+import {encodeSubscribe} from './encodeSubscribe';
 
 export interface PacketSubscribeData extends PacketHeaderData {
   /** Packet Identifier. */
@@ -20,6 +22,14 @@ export interface SubscriptionData {
 }
 
 export class PacketSubscribe extends Packet implements PacketSubscribeData {
+  /**
+   * @param i Packet Identifier
+   * @param p Properties
+   */
+  static create(i: number, p: Properties) {
+    return new PacketSubscribe(PACKET_TYPE.SUBSCRIBE << 4, 0, i, p, []);
+  }
+
   constructor(
     b: number,
     l: number,
@@ -29,9 +39,22 @@ export class PacketSubscribe extends Packet implements PacketSubscribeData {
   ) {
     super(b, l);
   }
+
+  public addSubscription(subscription: Subscription) {
+    this.s.push(subscription);
+  }
+
+  public toBuffer(version: number) {
+    return encodeSubscribe(this, version);
+  }
 }
 
 export class Subscription implements SubscriptionData {
+  static create(t: string, qualityOfService: QoS, noLocal: boolean, retainAsPublished: boolean, retainHandling: number): Subscription {
+    const flag = ((((((retainHandling & 0b11) << 1) | (retainAsPublished ? 1 : 0)) << 1) | (noLocal ? 1 : 0)) << 2) | (qualityOfService & 0b11);
+    return new Subscription(t, flag);
+  }
+
   constructor (public t: string, public f: number) {}
 
   public qualityOfService(): number {
