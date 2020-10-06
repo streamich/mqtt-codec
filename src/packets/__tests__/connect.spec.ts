@@ -70,3 +70,16 @@ test('can remove password', () => {
   expect(packet.passwordFlag()).toBe(false);
   expect(packet.pwd).toBe(undefined);
 });
+
+test('can change Clean Start flag', () => {
+  const packet = PacketConnect.create(5, 0, 30, {}, 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+  expect(packet.cleanStart()).toBe(false);
+  packet.setCleanStart(false);
+  expect(packet.cleanStart()).toBe(false);
+  packet.setCleanStart(true);
+  expect(packet.cleanStart()).toBe(true);
+  packet.setCleanStart(true);
+  expect(packet.cleanStart()).toBe(true);
+  packet.setCleanStart(false);
+  expect(packet.cleanStart()).toBe(false);
+});

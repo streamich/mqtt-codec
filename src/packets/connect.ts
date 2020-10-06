@@ -106,6 +106,10 @@ export class PacketConnect extends Packet implements PacketConnectData {
     return !!(this.f & 0b00000010);
   }
 
+  public setCleanStart(cleanStart: boolean) {
+    this.f = cleanStart ? (this.f | 0b00000010) : (this.f & ~0b00000010);
+  }
+
   public toBuffer(): Buffer {
     return encodeConnect(this);
   }
