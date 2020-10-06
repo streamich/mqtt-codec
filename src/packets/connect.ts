@@ -102,6 +102,20 @@ export class PacketConnect extends Packet implements PacketConnectData {
     return !!(this.f & 0b00000100);
   }
 
+  public setWill(will: Buffer, willTopic: string, willProps: Properties, willQualityOfService: QoS, willRetain: boolean) {
+    this.w = will;
+    this.wt = willTopic;
+    this.wp = willProps;
+    this.f = (((((willRetain ? 1 : 0) << 2) | (willQualityOfService & 0b11)) << 1) | 1) << 2;
+  }
+
+  public removeWill() {
+    this.w = undefined;
+    this.wt = undefined;
+    this.wp = undefined;
+    this.f &= ~0b00111100;
+  }
+
   public cleanStart(): boolean {
     return !!(this.f & 0b00000010);
   }

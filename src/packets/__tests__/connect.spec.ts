@@ -1,3 +1,4 @@
+import { PROPERTY } from '../../../es6/enums';
 import {PACKET_TYPE} from '../../enums';
 import {PacketConnect} from '../connect';
 
@@ -82,4 +83,60 @@ test('can change Clean Start flag', () => {
   expect(packet.cleanStart()).toBe(true);
   packet.setCleanStart(false);
   expect(packet.cleanStart()).toBe(false);
+});
+
+test('can set will', () => {
+  const packet = PacketConnect.create(5, 0, 30, {}, 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+  expect(packet.willFlag()).toBe(false);
+  expect(packet.willQos()).toBe(0);
+  expect(packet.willRetain()).toBe(false);
+  expect(packet.w).toBe(undefined);
+  expect(packet.wt).toBe(undefined);
+  expect(packet.wp).toBe(undefined);
+  packet.setWill(Buffer.from([1, 2]), 'topic', {[PROPERTY.ContentType]: 'json'}, 2, true);
+  expect(packet.willFlag()).toBe(true);
+  expect(packet.willQos()).toBe(2);
+  expect(packet.willRetain()).toBe(true);
+  expect(packet.w).toEqual(Buffer.from([1, 2]));
+  expect(packet.wt).toBe('topic');
+  expect(packet.wp).toEqual({[PROPERTY.ContentType]: 'json'});
+  packet.setWill(Buffer.from([0]), 'test', {}, 1, false);
+  expect(packet.willFlag()).toBe(true);
+  expect(packet.willQos()).toBe(1);
+  expect(packet.willRetain()).toBe(false);
+  expect(packet.w).toEqual(Buffer.from([0]));
+  expect(packet.wt).toBe('test');
+  expect(packet.wp).toEqual({});
+});
+
+test('can remove will', () => {
+  const packet = PacketConnect.create(5, 0, 30, {}, 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+  packet.removeWill();
+  expect(packet.willFlag()).toBe(false);
+  expect(packet.willQos()).toBe(0);
+  expect(packet.willRetain()).toBe(false);
+  expect(packet.w).toBe(undefined);
+  expect(packet.wt).toBe(undefined);
+  expect(packet.wp).toBe(undefined);
+  packet.setWill(Buffer.from([1, 2]), 'topic', {[PROPERTY.ContentType]: 'json'}, 2, true);
+  expect(packet.willFlag()).toBe(true);
+  expect(packet.willQos()).toBe(2);
+  expect(packet.willRetain()).toBe(true);
+  expect(packet.w).toEqual(Buffer.from([1, 2]));
+  expect(packet.wt).toBe('topic');
+  expect(packet.wp).toEqual({[PROPERTY.ContentType]: 'json'});
+  packet.removeWill();
+  expect(packet.willFlag()).toBe(false);
+  expect(packet.willQos()).toBe(0);
+  expect(packet.willRetain()).toBe(false);
+  expect(packet.w).toBe(undefined);
+  expect(packet.wt).toBe(undefined);
+  expect(packet.wp).toBe(undefined);
+  packet.removeWill();
+  expect(packet.willFlag()).toBe(false);
+  expect(packet.willQos()).toBe(0);
+  expect(packet.willRetain()).toBe(false);
+  expect(packet.w).toBe(undefined);
+  expect(packet.wt).toBe(undefined);
+  expect(packet.wp).toBe(undefined);
 });
