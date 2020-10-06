@@ -60,9 +60,14 @@ export const genProps = (props: Properties): Buffer => {
 
   // User properties
   value = props[PROPERTY.UserProperty];
-  if (value)
-    for (const [k, v] of value)
+  if (value) {
+    const len = value!.length;
+    for (let i = 0; i < len; i += 2) {
+      const k = value![i];
+      const v = value![i + 1];
       size += 1 + 2 + Buffer.byteLength(k) + 2 + Buffer.byteLength(v);
+    }
+  }  
 
   let offset = size < 128 ? 1 : size < 16_384 ? 2 : size < 2_097_152 ? 3 : 4;
   const buf = Buffer.allocUnsafe(size + offset);
@@ -267,7 +272,10 @@ export const genProps = (props: Properties): Buffer => {
 
   value = props[PROPERTY.UserProperty];
   if (value) {
-    for (const [k, v] of value) {
+    const len = value!.length;
+    for (let i = 0; i < len; i += 2) {
+      const k = value![i];
+      const v = value![i + 1];
       const kLen = Buffer.byteLength(k);
       const vLen = Buffer.byteLength(v);
       buf.writeUInt8(PROPERTY.UserProperty, offset++);

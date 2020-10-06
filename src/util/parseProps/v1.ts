@@ -70,7 +70,7 @@ export const parseProps = (data: BufferLike, offset: number): [props: Properties
         offset += 2 + key.byteLength;
         const value = parseBinary(data, offset);
         offset += 2 + value.byteLength;
-        props[PROPERTY.UserProperty]!.push([key.toString('utf8'), value.toString('utf8')]);
+        props[PROPERTY.UserProperty]!.push(key.toString('utf8'), value.toString('utf8'));
         break;
       }
       default: {

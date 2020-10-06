@@ -44,7 +44,7 @@ for (let i = 0; i < generators.length; i++) {
       const packet1 = PacketPublish.create('topic', 1, {
         [PROPERTY.AssignedClientIdentifier]: 'test',
         [PROPERTY.UserProperty]: [
-          ['test', 'test'],
+          'test', 'test',
         ],
       }, Buffer.from([1, 2, 3]));
       packet1.setQualityOfService(1);
@@ -59,7 +59,7 @@ for (let i = 0; i < generators.length; i++) {
       expect(packet2.p).toEqual({
         [PROPERTY.AssignedClientIdentifier]: 'test',
         [PROPERTY.UserProperty]: [
-          ['test', 'test'],
+          'test', 'test',
         ],
       });
       expect(packet2.d).toEqual(Buffer.from([1, 2, 3]));

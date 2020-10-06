@@ -45,7 +45,7 @@ test('can encode properties', () => {
   const packet1 = PacketPublish.create('topic', 1, {
     [PROPERTY.AssignedClientIdentifier]: 'test',
     [PROPERTY.UserProperty]: [
-      ['test', 'test'],
+      'test', 'test',
     ],
   }, Buffer.from([1, 2, 3]));
   packet1.setQualityOfService(1);
@@ -60,7 +60,7 @@ test('can encode properties', () => {
   expect(packet2.p).toEqual({
     [PROPERTY.AssignedClientIdentifier]: 'test',
     [PROPERTY.UserProperty]: [
-      ['test', 'test'],
+      'test', 'test',
     ],
   });
   expect(packet2.d).toEqual(Buffer.from([1, 2, 3]));

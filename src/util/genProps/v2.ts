@@ -178,7 +178,10 @@ export const genProps = (props: Properties): Buffer => {
 
   value = props[PROPERTY.UserProperty];
   if (value) {
-    for (const [k, v] of value) {
+    const len = value!.length;
+    for (let i = 0; i < len; i += 2) {
+      const k = value![i];
+      const v = value![i + 1];
       const buf1 = Buffer.allocUnsafe(3);
       const buf2 = Buffer.from(k, 'utf8');
       const buf3 = Buffer.allocUnsafe(2);

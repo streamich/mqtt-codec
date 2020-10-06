@@ -9,7 +9,7 @@ import {genProps as v8} from '../v8';
 import {genProps as v9} from '../v9';
 import {genProps as v10} from '../v10';
 import {genProps as v11} from '../v11';
-import {parseProps} from '../../parse';
+import {parseProps} from '../../parseProps';
 import {PROPERTY} from '../../../enums';
 
 const generators = [v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11];
@@ -215,13 +215,13 @@ for (let i = 0; i < generators.length; i++) {
     test('can encode user property', () => {
       const buf = genProps({
         [PROPERTY.UserProperty]: [
-          ['X-Forward-Ip', '127.0.0.1'],
+          'X-Forward-Ip', '127.0.0.1',
         ],
       });
       const props = parseProps(buf, 0)[0];
       expect(props).toEqual({
         [PROPERTY.UserProperty]: [
-          ['X-Forward-Ip', '127.0.0.1'],
+          'X-Forward-Ip', '127.0.0.1',
         ],
       });
     });
@@ -229,17 +229,17 @@ for (let i = 0; i < generators.length; i++) {
     test('can have multiple user properties', () => {
       const buf = genProps({
         [PROPERTY.UserProperty]: [
-          ['1', 'a'],
-          ['2', 'b'],
-          ['3', 'c'],
+          '1', 'a',
+          '2', 'b',
+          '3', 'c',
         ],
       });
       const props = parseProps(buf, 0)[0];
       expect(props).toEqual({
         [PROPERTY.UserProperty]: [
-          ['1', 'a'],
-          ['2', 'b'],
-          ['3', 'c'],
+          '1', 'a',
+          '2', 'b',
+          '3', 'c',
         ],
       });
     });
@@ -247,17 +247,17 @@ for (let i = 0; i < generators.length; i++) {
     test('can set same property multiple times', () => {
       const buf = genProps({
         [PROPERTY.UserProperty]: [
-          ['key', 'value-1'],
-          ['key', 'value-2'],
-          ['key', 'value-3'],
+          'key', 'value-1',
+          'key', 'value-2',
+          'key', 'value-3',
         ],
       });
       const props = parseProps(buf, 0)[0];
       expect(props).toEqual({
         [PROPERTY.UserProperty]: [
-          ['key', 'value-1'],
-          ['key', 'value-2'],
-          ['key', 'value-3'],
+          'key', 'value-1',
+          'key', 'value-2',
+          'key', 'value-3',
         ],
       });
     });
@@ -271,9 +271,9 @@ for (let i = 0; i < generators.length; i++) {
         [PROPERTY.CorrelationData]: Buffer.from('xcxcxcxc-xcxc-xcxc-xcxc-xcxcxcxcxcxc', 'utf8'),
         [PROPERTY.ResponseTopic]: 'europe/germany/munich/sensors/temperature/room-32/termostats/#',
         [PROPERTY.UserProperty]: [
-          ['Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD'],
-          ['Ip-Address', '0.0.0.0'],
-          ['Cache', 'no-cache'],
+          'Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD',
+          'Ip-Address', '0.0.0.0',
+          'Cache', 'no-cache',
         ],
       });
       const props = parseProps(buf, 0)[0];
@@ -285,9 +285,9 @@ for (let i = 0; i < generators.length; i++) {
         [PROPERTY.CorrelationData]: Buffer.from('xcxcxcxc-xcxc-xcxc-xcxc-xcxcxcxcxcxc', 'utf8'),
         [PROPERTY.ResponseTopic]: 'europe/germany/munich/sensors/temperature/room-32/termostats/#',
         [PROPERTY.UserProperty]: [
-          ['Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD'],
-          ['Ip-Address', '0.0.0.0'],
-          ['Cache', 'no-cache'],
+          'Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD',
+          'Ip-Address', '0.0.0.0',
+          'Cache', 'no-cache',
         ],
       });
     });
@@ -301,9 +301,9 @@ for (let i = 0; i < generators.length; i++) {
         '33': 20000, // ReceiveMaximum
         '37': 100, // RetainAvailable
         '38': [ // UserProperty
-          [ 'Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD' ],
-          [ 'Ip-Address', '0.0.0.0' ],
-          [ 'Cache', 'no-cache' ],
+          'Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD',
+          'Ip-Address', '0.0.0.0',
+          'Cache', 'no-cache',
         ],
       });
       const props = parseProps(buf, 0)[0];
@@ -315,9 +315,9 @@ for (let i = 0; i < generators.length; i++) {
         [PROPERTY.CorrelationData]: Buffer.from('xcxcxcxc-xcxc-xcxc-xcxc-xcxcxcxcxcxc', 'utf8'),
         [PROPERTY.ResponseTopic]: 'europe/germany/munich/sensors/temperature/room-32/termostats/#',
         [PROPERTY.UserProperty]: [
-          ['Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD'],
-          ['Ip-Address', '0.0.0.0'],
-          ['Cache', 'no-cache'],
+          'Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD',
+          'Ip-Address', '0.0.0.0',
+          'Cache', 'no-cache',
         ],
       });
     });

@@ -272,7 +272,7 @@ describe('CONNECT', () => {
       [PROPERTY.RequestResponseInformation]: 1,
       [PROPERTY.RequestProblemInformation]: 1,
       [PROPERTY.UserProperty]: [
-        ['test', 'test'],
+        'test', 'test',
       ],
       [PROPERTY.AuthenticationMethod]: 'test',
       [PROPERTY.AuthenticationData]: Buffer.from([1, 2, 3, 4]),
@@ -286,7 +286,7 @@ describe('CONNECT', () => {
       [PROPERTY.ResponseTopic]: 'topic',
       [PROPERTY.CorrelationData]: Buffer.from([1, 2, 3, 4]),
       [PROPERTY.UserProperty]: [
-        ['test', 'test'],
+        'test', 'test',
       ],
     });
     expect(packet.wt).toBe('topic');
@@ -343,7 +343,7 @@ describe('CONNECT', () => {
       [PROPERTY.RequestResponseInformation]: 1,
       [PROPERTY.RequestProblemInformation]: 1,
       [PROPERTY.UserProperty]: [
-        ['test', 'test'],
+        'test', 'test',
       ],
       [PROPERTY.AuthenticationMethod]: 'test',
       [PROPERTY.AuthenticationData]: Buffer.from([1, 2, 3, 4]),
@@ -357,7 +357,7 @@ describe('CONNECT', () => {
       [PROPERTY.ResponseTopic]: 'topic',
       [PROPERTY.CorrelationData]: Buffer.from([1, 2, 3, 4]),
       [PROPERTY.UserProperty]: [
-        ['test', 'test'],
+        'test', 'test',
       ],
     });
     expect(packet.wt).toBe('topic');
@@ -408,7 +408,7 @@ describe('CONNECT', () => {
       [PROPERTY.RequestResponseInformation]: 1,
       [PROPERTY.RequestProblemInformation]: 1,
       [PROPERTY.UserProperty]: [
-        ['test', 'test'],
+        'test', 'test',
       ],
       [PROPERTY.AuthenticationMethod]: 'test',
       [PROPERTY.AuthenticationData]: Buffer.from([1, 2, 3, 4]),
@@ -903,7 +903,7 @@ describe('CONNACK', () => {
       [PROPERTY.MaximumPacketSize]: 100,
       [PROPERTY.AssignedClientIdentifier]: 'test',
       [PROPERTY.UserProperty]: [
-        ['test', 'test'],
+        'test', 'test',
       ],
       [PROPERTY.WildcardSubscriptionAvailable]: 1,
       [PROPERTY.SubscriptionIdentifierAvailable]: 1,
@@ -956,8 +956,8 @@ describe('CONNACK', () => {
       [PROPERTY.MaximumPacketSize]: 100,
       [PROPERTY.AssignedClientIdentifier]: 'test',
       [PROPERTY.UserProperty]: [
-        ['test', 'test'],
-        ['test', 'test'],
+        'test', 'test',
+        'test', 'test',
       ],
       [PROPERTY.WildcardSubscriptionAvailable]: 1,
       [PROPERTY.SubscriptionIdentifierAvailable]: 1,
@@ -1068,9 +1068,9 @@ describe('PUBLISH', () => {
       [PROPERTY.ResponseTopic]: 'topic',
       [PROPERTY.CorrelationData]: Buffer.from([1, 2, 3, 4]),
       [PROPERTY.UserProperty]: [
-        ['test', 'test'],
-        ['test', 'test'],
-        ['test', 'test'],
+        'test', 'test',
+        'test', 'test',
+        'test', 'test',
       ],
       [PROPERTY.SubscriptionIdentifier]: 120,
       [PROPERTY.ContentType]: 'test',
@@ -1112,7 +1112,7 @@ describe('PUBLISH', () => {
       [PROPERTY.ResponseTopic]: 'topic',
       [PROPERTY.CorrelationData]: Buffer.from([1, 2, 3, 4]),
       [PROPERTY.UserProperty]: [
-        ['test', 'test'],
+        'test', 'test',
       ],
       [PROPERTY.SubscriptionIdentifier]: 122,
       [PROPERTY.ContentType]: 'test',
@@ -1300,7 +1300,7 @@ describe('PUBACK', () => {
     expect(packet.c).toBe(16);
     expect(packet.p).toEqual({
       [PROPERTY.ReasonString]: 'test',
-      [PROPERTY.UserProperty]: [['test', 'test']],
+      [PROPERTY.UserProperty]: ['test', 'test'],
     });
   });
 });
@@ -1340,7 +1340,7 @@ describe('PUBREC', () => {
     expect(packet.c).toBe(16);
     expect(packet.p).toEqual({
       [PROPERTY.ReasonString]: 'test',
-      [PROPERTY.UserProperty]: [['test', 'test']],
+      [PROPERTY.UserProperty]: ['test', 'test'],
     });
   });
 });
@@ -1380,7 +1380,7 @@ describe('PUBREL', () => {
     expect(packet.c).toBe(16);
     expect(packet.p).toEqual({
       [PROPERTY.ReasonString]: 'test',
-      [PROPERTY.UserProperty]: [['test', 'test']],
+      [PROPERTY.UserProperty]: ['test', 'test'],
     });
   });
 });
@@ -1421,7 +1421,7 @@ describe('PUBCOMP', () => {
     expect(packet.p).toEqual({
       [PROPERTY.ReasonString]: 'test',
       [PROPERTY.UserProperty]: [
-        ['test', 'test'],
+        'test', 'test',
       ],
     });
   });
@@ -1471,7 +1471,7 @@ describe('SUBSCRIBE', () => {
     expect(packet.i).toBe(6);
     expect(packet.p).toEqual({
       [PROPERTY.SubscriptionIdentifier]: 145,
-      [PROPERTY.UserProperty]: [['test', 'test']],
+      [PROPERTY.UserProperty]: ['test', 'test'],
     });
     expect(packet.s.length).toBe(1);
     expect(packet.s[0].t).toBe('test');
@@ -1544,7 +1544,7 @@ describe('SUBSCRIBE', () => {
       i: 7,
       p: {
         [PROPERTY.SubscriptionIdentifier]: 145,
-        [PROPERTY.UserProperty]: [['test', 'test']],
+        [PROPERTY.UserProperty]: ['test', 'test'],
       },
       s: [
         {
@@ -1614,7 +1614,7 @@ describe('SUBACK', () => {
     expect(packet.i).toBe(6);
     expect(packet.p).toEqual({
       [PROPERTY.ReasonString]: 'test',
-      [PROPERTY.UserProperty]: [['test', 'test']],
+      [PROPERTY.UserProperty]: ['test', 'test'],
     });
     expect(packet.s).toEqual([0, 1, 2, 1]);
   });
@@ -1658,7 +1658,7 @@ describe('UNSUBSCRIBE', () => {
     expect(packet.l).toBe(28);
     expect(packet.i).toBe(7);
     expect(packet.p).toEqual({
-      [PROPERTY.UserProperty]: [['test', 'test']],
+      [PROPERTY.UserProperty]: ['test', 'test'],
     });
     expect(packet.s).toEqual(['tfst', 'test']);
   });
@@ -1683,7 +1683,7 @@ describe('UNSUBACK', () => {
     expect(packet.i).toBe(8);
     expect(packet.p).toEqual({
       [PROPERTY.ReasonString]: 'test',
-      [PROPERTY.UserProperty]: [['test', 'test']],
+      [PROPERTY.UserProperty]: ['test', 'test'],
     });
     expect(packet.s).toEqual([0, 128]);
   });
@@ -1792,7 +1792,7 @@ describe('DISCONNECT', () => {
       [PROPERTY.SessionExpiryInterval]: 145,
       [PROPERTY.ReasonString]: 'test',
       [PROPERTY.ServerReference]: 'test',
-      [PROPERTY.UserProperty]: [['test', 'test']],
+      [PROPERTY.UserProperty]: ['test', 'test'],
     });
   });
 
@@ -1830,7 +1830,7 @@ describe('AUTH', () => {
       [PROPERTY.AuthenticationMethod]: 'test',
       [PROPERTY.AuthenticationData]: Buffer.from([0, 1, 2, 3]),
       [PROPERTY.ReasonString]: 'test',
-      [PROPERTY.UserProperty]: [['test', 'test']],
+      [PROPERTY.UserProperty]: ['test', 'test'],
     });
   });
 });

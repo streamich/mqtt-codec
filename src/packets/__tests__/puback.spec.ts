@@ -50,7 +50,7 @@ test('can serialize packet and deserialize it back', () => {
 test('can serialize packet and deserialize it with props', () => {
   const packet1 = PacketPuback.create(1, 2, {
     [PROPERTY.UserProperty]: [
-      ['a', 'b'],
+      'a', 'b',
     ],
   });
   const decoder = new MqttDecoder();
@@ -62,7 +62,7 @@ test('can serialize packet and deserialize it with props', () => {
   expect(packet2.c).toEqual(2);
   expect(packet2.p).toEqual({
     [PROPERTY.UserProperty]: [
-      ['a', 'b'],
+      'a', 'b',
     ],
   });
 });

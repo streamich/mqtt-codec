@@ -238,9 +238,9 @@ export const writeProps = (props: Properties, buf: Buffer, offset: number, props
 
   if (UserProperty) {
     const len = UserProperty.length;
-    for (let i = 0; i < len; i++) {
-      const k = UserProperty[i][0];
-      const v = UserProperty[i][1];
+    for (let i = 0; i < len; i += 2) {
+      const k = UserProperty[i];
+      const v = UserProperty[i + 1];
       const kLen = Buffer.byteLength(k);
       const vLen = Buffer.byteLength(v);
       buf.writeUInt8(PROPERTY.UserProperty, offset++);

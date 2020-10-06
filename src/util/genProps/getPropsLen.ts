@@ -92,9 +92,8 @@ export const getPropsLen = (props: Properties): number => {
   // User properties
   if (UserProperty) {
     const len = UserProperty.length;
-    for (let i = 0; i < len; i++) {
-      const tuple = UserProperty[i];
-      size += 5 + byteLength(tuple[0]) + byteLength(tuple[1]);
+    for (let i = 0; i < len; i += 2) {
+      size += 5 + byteLength(UserProperty[i]) + byteLength(UserProperty[i + 1]);
     }
   }
 

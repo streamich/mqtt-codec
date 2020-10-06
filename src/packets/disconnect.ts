@@ -1,6 +1,6 @@
 import {Packet, PacketHeaderData} from '../packet';
 import {BufferLike, Properties} from '../types';
-import {parseProps} from '../util/parse';
+import {parseProps} from '../util/parseProps';
 
 export interface PacketDisconnectData extends PacketHeaderData {
   /** Disconnect Reason Code. */

@@ -15,7 +15,8 @@ import {PacketPingreq} from './packets/pingreq';
 import {PacketPingresp} from './packets/pingresp';
 import {PacketDisconnect, parseDisconnect} from './packets/disconnect';
 import {PacketAuth, parseAuth} from './packets/auth';
-import {parseBinary, parseProps} from './util/parse';
+import {parseBinary} from './util/parse';
+import {parseProps} from './util/parseProps';
 import {Properties} from './types';
 
 const enum DECODER_STATE {

@@ -97,8 +97,8 @@ export const genProps = (props: Properties): Buffer => {
   // User properties
   if (UserProperty) {
     const len = UserProperty.length;
-    for (let i = 0; i < len; i++)
-      size += 5 + Buffer.byteLength(UserProperty[i][0]) + Buffer.byteLength(UserProperty[i][1]);
+    for (let i = 0; i < len; i += 2)
+      size += 5 + Buffer.byteLength(UserProperty[i]) + Buffer.byteLength(UserProperty[i + 1]);
   }
 
   let offset: number = 0;
@@ -295,15 +295,15 @@ export const genProps = (props: Properties): Buffer => {
   if (UserProperty) {
     const len = UserProperty.length;
     let str = '';
-    for (let i = 0; i < len; i++) {
-      const k = UserProperty[i][0];
-      const v = UserProperty[i][1];
+    for (let i = 0; i < len; i += 2) {
+      const k = UserProperty[i];
+      const v = UserProperty[i + 1];
       str += '___' + k + '__' + v;
     }
     buf.write(str, offset);
-    for (let i = 0; i < len; i++) {
-      const k = UserProperty[i][0];
-      const v = UserProperty[i][1];
+    for (let i = 0; i < len; i += 2) {
+      const k = UserProperty[i];
+      const v = UserProperty[i + 1];
       const kLen = Buffer.byteLength(k);
       const vLen = Buffer.byteLength(v);
       buf.writeUInt8(PROPERTY.UserProperty, offset++);

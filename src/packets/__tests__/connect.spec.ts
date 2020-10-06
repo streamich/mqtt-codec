@@ -272,7 +272,7 @@ test('can serialize properties', () => {
   const packet1 = PacketConnect.create(5, 30, {
     [PROPERTY.ContentType]: 'test',
     [PROPERTY.UserProperty]: [
-      ['test', 'test'],
+      'test', 'test',
     ],
   }, '');
   const buf = packet1.toBuffer();
@@ -283,7 +283,7 @@ test('can serialize properties', () => {
   expect(packet2.p).toEqual({
     [PROPERTY.ContentType]: 'test',
     [PROPERTY.UserProperty]: [
-      ['test', 'test'],
+      'test', 'test',
     ],
   });
 });
@@ -293,7 +293,7 @@ test('can serialize will', () => {
   packet1.setWill(Buffer.from([1, 2, 3, 4, 5]), 'aha', {
     [PROPERTY.ContentType]: 'test',
     [PROPERTY.UserProperty]: [
-      ['test', 'test'],
+      'test', 'test',
     ],
   }, 2, true)
   const buf = packet1.toBuffer();
@@ -309,7 +309,7 @@ test('can serialize will', () => {
   expect(packet2.wp).toEqual({
     [PROPERTY.ContentType]: 'test',
     [PROPERTY.UserProperty]: [
-      ['test', 'test'],
+      'test', 'test',
     ],
   });
 });
@@ -318,13 +318,13 @@ test('can serialize will and packet properties', () => {
   const packet1 = PacketConnect.create(5, 30, {
     [PROPERTY.ContentType]: 'test2',
     [PROPERTY.UserProperty]: [
-      ['test2', 'test2'],
+      'test2', 'test2',
     ],
   }, '');
   packet1.setWill(Buffer.from([1, 2, 3, 4, 5]), 'aha', {
     [PROPERTY.ContentType]: 'test',
     [PROPERTY.UserProperty]: [
-      ['test', 'test'],
+      'test', 'test',
     ],
   }, 0, false)
   const buf = packet1.toBuffer();
@@ -335,7 +335,7 @@ test('can serialize will and packet properties', () => {
   expect(packet2.p).toEqual({
     [PROPERTY.ContentType]: 'test2',
     [PROPERTY.UserProperty]: [
-      ['test2', 'test2'],
+      'test2', 'test2',
     ],
   });
   expect(packet2.willFlag()).toBe(true);
@@ -346,7 +346,7 @@ test('can serialize will and packet properties', () => {
   expect(packet2.wp).toEqual({
     [PROPERTY.ContentType]: 'test',
     [PROPERTY.UserProperty]: [
-      ['test', 'test'],
+      'test', 'test',
     ],
   });
 });

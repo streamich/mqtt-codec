@@ -1,6 +1,7 @@
 import {Packet, PacketHeaderData} from '../packet';
 import {BufferLike, Properties} from '../types';
-import {parseBinary, parseProps} from '../util/parse';
+import {parseBinary} from '../util/parse';
+import {parseProps} from '../util/parseProps';
 
 export interface PacketUnsubscribeData extends PacketHeaderData {
   /** Packet Identifier. */

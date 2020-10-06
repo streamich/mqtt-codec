@@ -99,9 +99,8 @@ export const genProps = (props: Properties): Buffer => {
   // User properties
   if (UserProperty) {
     const len = UserProperty.length;
-    for (let i = 0; i < len; i++) {
-      const tuple = UserProperty[i];
-      size += 5 + byteLength(tuple[0]) + byteLength(tuple[1]);
+    for (let i = 0; i < len; i += 2) {
+      size += 5 + byteLength(UserProperty[i]) + byteLength(UserProperty[i + 1]);
     }
   }
 
@@ -301,9 +300,9 @@ export const genProps = (props: Properties): Buffer => {
 
   if (UserProperty) {
     const len = UserProperty.length;
-    for (let i = 0; i < len; i++) {
-      const k = UserProperty[i][0];
-      const v = UserProperty[i][1];
+    for (let i = 0; i < len; i += 2) {
+      const k = UserProperty[i];
+      const v = UserProperty[i + 1];
       const kLen = byteLength(k);
       const vLen = byteLength(v);
       writeUInt8(PROPERTY.UserProperty, offset++);
