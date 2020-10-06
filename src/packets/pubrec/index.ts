@@ -1,7 +1,6 @@
-import {BufferList} from '../BufferList';
-import {Packet, PacketHeaderData} from '../packet';
-import {BufferLike, Properties} from '../types';
-import {parseProps} from '../util/parse';
+import {Packet, PacketHeaderData} from '../../packet';
+import {BufferLike, Properties} from '../../types';
+import {parseProps} from '../../util/parse';
 
 export interface PacketPubrecData extends PacketHeaderData {
   /** Packet Identifier. */
