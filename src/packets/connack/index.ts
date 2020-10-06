@@ -1,7 +1,7 @@
-import {BufferList} from '../BufferList';
-import {Packet, PacketHeaderData} from '../packet';
-import {BufferLike, Properties} from '../types';
-import {parseProps} from '../util/parse';
+import { PACKET_TYPE } from '../../enums';
+import {Packet, PacketHeaderData} from '../../packet';
+import {BufferLike, Properties} from '../../types';
+import {parseProps} from '../../util/parse';
 
 export interface PacketConnackData extends PacketHeaderData {
   /** Connect Acknowledge Flags. */
@@ -13,6 +13,18 @@ export interface PacketConnackData extends PacketHeaderData {
 }
 
 export class PacketConnack extends Packet implements PacketConnackData {
+  /**
+   * 
+   * @param c Reason Code
+   * @param p Properties
+   */
+  static create(
+    c: number,
+    p: Properties,
+  ): PacketConnack {
+    return new PacketConnack(PACKET_TYPE.CONNACK << 4, 0, 0, c, p);
+  }
+
   constructor(
     b: number,
     l: number,
@@ -26,6 +38,14 @@ export class PacketConnack extends Packet implements PacketConnackData {
   public sessionPresent(): boolean {
     return !!(this.f & 0b1);
   }
+
+  public setSessionPresent(sessionPresent: boolean) {
+    this.f = sessionPresent ? (this.f | 0b1) : (this.f & ~0b1);
+  }
+
+  // public toBuffer(): Buffer {
+
+  // }
 }
 
 export const parseConnack = (b: number, l: number, data: BufferLike, version: number): PacketConnack => {
