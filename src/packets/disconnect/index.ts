@@ -1,6 +1,10 @@
-import {Packet, PacketHeaderData} from '../packet';
-import {BufferLike, Properties} from '../types';
-import {parseProps} from '../util/parseProps';
+import {PACKET_TYPE} from '../../enums';
+import {Packet, PacketHeaderData} from '../../packet';
+import {BufferLike, Properties} from '../../types';
+import {parseProps} from '../../util/parseProps';
+import {encodeDisconnect, DISCONNECT} from './encodeDisconnect';
+
+export {DISCONNECT};
 
 export interface PacketDisconnectData extends PacketHeaderData {
   /** Disconnect Reason Code. */
@@ -10,6 +14,14 @@ export interface PacketDisconnectData extends PacketHeaderData {
 }
 
 export class PacketDisconnect extends Packet implements PacketDisconnectData {
+  /**
+   * @param c Disconnect Reason Code
+   * @param p Properties
+   */
+  static create(c: number, p: Properties): PacketDisconnect {
+    return new PacketDisconnect(PACKET_TYPE.DISCONNECT << 4, 0, c, p);
+  }
+
   constructor(
     b: number,
     l: number,
@@ -17,6 +29,10 @@ export class PacketDisconnect extends Packet implements PacketDisconnectData {
     public p: Properties,
   ) {
     super(b, l);
+  }
+
+  public toBuffer(version: number): Buffer {
+    return encodeDisconnect(this, version);
   }
 }
 
