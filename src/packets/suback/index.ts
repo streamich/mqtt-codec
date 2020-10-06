@@ -1,17 +1,28 @@
-import {Packet, PacketHeaderData} from '../packet';
-import {BufferLike, Properties} from '../types';
-import {parseProps} from '../util/parseProps';
+import {PACKET_TYPE} from '../../enums';
+import {Packet, PacketHeaderData} from '../../packet';
+import {BufferLike, Properties} from '../../types';
+import {parseProps} from '../../util/parseProps';
+import {encodeSuback} from './encodeSuback';
 
 export interface PacketSubackData extends PacketHeaderData {
   /** Packet Identifier. */
   i: number;
   /** Properties. */
   p: Properties;
-  /** SUBACK Payload. */
+  /** Reason Codes. */
   s: number[];
 }
 
 export class PacketSuback extends Packet implements PacketSubackData {
+  /**
+   * @param i Packet Identifier
+   * @param p Properties
+   * @param s Reason Codes
+   */
+  static create(i: number, p: Properties, s: number[]) {
+    return new PacketSuback(PACKET_TYPE.SUBACK << 4, 0, i, p, s);
+  }
+
   constructor(
     b: number,
     l: number,
@@ -20,6 +31,10 @@ export class PacketSuback extends Packet implements PacketSubackData {
     public s: number[],
   ) {
     super(b, l);
+  }
+
+  public toBuffer(version: number): Buffer {
+    return encodeSuback(this, version);
   }
 }
 
