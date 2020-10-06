@@ -1,4 +1,4 @@
-import { PACKET_TYPE } from '../enums';
+import {PACKET_TYPE} from '../enums';
 import {Packet, PacketHeaderData} from '../packet';
 import {Properties, QoS} from '../types';
 import {encodeConnect} from './connect/encodeConnect';
@@ -78,6 +78,16 @@ export class PacketConnect extends Packet implements PacketConnectData {
 
   public passwordFlag(): boolean {
     return !!(this.f & 0b01000000);
+  }
+
+  public setPassword(pwd: Buffer) {
+    this.pwd = pwd;
+    this.f |= 0b01000000;
+  }
+
+  public removePassword() {
+    this.pwd = undefined;
+    this.f &= ~0b01000000;
   }
 
   public willRetain(): boolean {

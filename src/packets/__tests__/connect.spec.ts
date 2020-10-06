@@ -40,3 +40,33 @@ test('can remove username', () => {
   expect(packet.userNameFlag()).toBe(false);
   expect(packet.usr).toBe(undefined);
 });
+
+test('can set password', () => {
+  const packet = PacketConnect.create(5, 0, 30, {}, 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+  expect(packet.passwordFlag()).toBe(false);
+  expect(packet.usr).toBe(undefined);
+  packet.setPassword(Buffer.from([1, 2, 3]));
+  expect(packet.passwordFlag()).toBe(true);
+  expect(packet.pwd).toEqual(Buffer.from([1, 2, 3]));
+  packet.setPassword(Buffer.from([0, 0, 0]));
+  expect(packet.passwordFlag()).toBe(true);
+  expect(packet.pwd).toEqual(Buffer.from([0, 0, 0]));
+  packet.setPassword(Buffer.from([]));
+  expect(packet.passwordFlag()).toBe(true);
+  expect(packet.pwd).toEqual(Buffer.from([]));
+});
+
+test('can remove password', () => {
+  const packet = PacketConnect.create(5, 0, 30, {}, 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+  expect(packet.passwordFlag()).toBe(false);
+  expect(packet.pwd).toBe(undefined);
+  packet.removePassword();
+  expect(packet.passwordFlag()).toBe(false);
+  expect(packet.pwd).toBe(undefined);
+  packet.setPassword(Buffer.from([0, 0, 0]));
+  expect(packet.passwordFlag()).toBe(true);
+  expect(packet.pwd).toEqual(Buffer.from([0, 0, 0]));
+  packet.removePassword();
+  expect(packet.passwordFlag()).toBe(false);
+  expect(packet.pwd).toBe(undefined);
+});
