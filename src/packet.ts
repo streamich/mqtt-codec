@@ -12,7 +12,10 @@ export class Packet implements PacketHeaderData {
   /** Packet first byte. */
   public b: number;
 
-  /** Variable length. */
+  /**
+   * Remaining Length - packet size less first byte and Remaining Length
+   * variable integer size.
+   */
   public l: number;
 
   constructor(b: number, l: number) {

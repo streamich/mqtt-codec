@@ -1,7 +1,7 @@
-import {BufferList} from '../BufferList';
+import { PACKET_TYPE } from '../enums';
 import {Packet, PacketHeaderData} from '../packet';
 import {Properties, QoS} from '../types';
-import {parseProps, parseBinary} from '../util/parse';
+import {encodeConnect} from './connect/encodeConnect';
 
 export interface PacketConnectData extends PacketHeaderData {
   /** Protocol version. */
@@ -27,6 +27,23 @@ export interface PacketConnectData extends PacketHeaderData {
 }
 
 export class PacketConnect extends Packet implements PacketConnectData {
+  /**
+   * @param v Version, i.e. 5 or 4
+   * @param f Connect flags
+   * @param k Keep-alive
+   * @param p Properties object in case of MQTT 5.0, or empty `{}` object otherwise.
+   * @param id Connection ID
+   */
+  static create(
+    v: number,
+    f: number,
+    k: number,
+    p: Properties,
+    id: string,
+  ): PacketConnect {
+    return new PacketConnect(PACKET_TYPE.CONNECT << 4, 0, v, f, k, p, id);
+  }
+
   public wp?: Properties;
   public wt?: string;
   public w?: Buffer;
@@ -49,6 +66,16 @@ export class PacketConnect extends Packet implements PacketConnectData {
     return !!(this.f & 0b10000000);
   }
 
+  public setUserName(usr: string) {
+    this.usr = usr;
+    this.f |= 0b10000000;
+  }
+
+  public removeUserName() {
+    this.usr = undefined;
+    this.f &= ~0b10000000;
+  }
+
   public passwordFlag(): boolean {
     return !!(this.f & 0b01000000);
   }
@@ -67,5 +94,9 @@ export class PacketConnect extends Packet implements PacketConnectData {
 
   public cleanStart(): boolean {
     return !!(this.f & 0b00000010);
+  }
+
+  public toBuffer(): Buffer {
+    return encodeConnect(this);
   }
 }

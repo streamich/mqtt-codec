@@ -18,7 +18,7 @@ export const encodePublish = (packet: PacketPublish, version: number): Buffer =>
   const buf = Buffer.allocUnsafe(bufferLength);
   packet.l = remainingLength;
   
-  buf.writeUInt8(packet.b);
+  buf.writeUInt8(packet.b, 0);
 
   let offset = 1;
 
