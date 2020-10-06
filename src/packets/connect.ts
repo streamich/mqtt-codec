@@ -106,7 +106,8 @@ export class PacketConnect extends Packet implements PacketConnectData {
     this.w = will;
     this.wt = willTopic;
     this.wp = willProps;
-    this.f = (((((willRetain ? 1 : 0) << 2) | (willQualityOfService & 0b11)) << 1) | 1) << 2;
+    const bits = ((((willRetain ? 1 : 0) << 2) | (willQualityOfService & 0b11)) << 1) | 1;
+    this.f = (this.f & ~0b111100) | (bits << 2);
   }
 
   public removeWill() {

@@ -1,4 +1,4 @@
-import { PROPERTY } from '../../../es6/enums';
+import {PROPERTY} from '../../../es6/enums';
 import {PACKET_TYPE} from '../../enums';
 import {PacketConnect} from '../connect';
 
@@ -139,4 +139,78 @@ test('can remove will', () => {
   expect(packet.w).toBe(undefined);
   expect(packet.wt).toBe(undefined);
   expect(packet.wp).toBe(undefined);
+});
+
+test('can manipulate multiple properties simultaneously', () => {
+  const packet = PacketConnect.create(5, 0, 30, {}, 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx');
+
+  expect(packet.qualityOfService()).toBe(0);
+  packet.setQualityOfService(2);
+  expect(packet.qualityOfService()).toBe(2);
+
+  expect(packet.usr).toBe(undefined);
+  packet.setUserName('foo');
+  expect(packet.qualityOfService()).toBe(2);
+  expect(packet.usr).toBe('foo');
+
+  expect(packet.pwd).toBe(undefined);
+  packet.setPassword(Buffer.from([1, 2]));
+  expect(packet.pwd).toEqual(Buffer.from([1, 2]));
+  expect(packet.qualityOfService()).toBe(2);
+  expect(packet.usr).toBe('foo');
+
+  expect(packet.cleanStart()).toBe(false);
+  packet.setCleanStart(true);
+  expect(packet.cleanStart()).toBe(true);
+  expect(packet.pwd).toEqual(Buffer.from([1, 2]));
+  expect(packet.qualityOfService()).toBe(2);
+  expect(packet.usr).toBe('foo');
+
+  expect(packet.willFlag()).toBe(false);
+  expect(packet.willRetain()).toBe(false);
+  expect(packet.willQos()).toBe(0);
+  packet.setWill(Buffer.from([25]), 't', {}, 0, false);
+  expect(packet.willFlag()).toBe(true);
+  expect(packet.willRetain()).toBe(false);
+  expect(packet.willQos()).toBe(0);
+  expect(packet.cleanStart()).toBe(true);
+  expect(packet.pwd).toEqual(Buffer.from([1, 2]));
+  expect(packet.qualityOfService()).toBe(2);
+  expect(packet.usr).toBe('foo');
+
+  packet.removePassword();
+  expect(packet.willFlag()).toBe(true);
+  expect(packet.willRetain()).toBe(false);
+  expect(packet.willQos()).toBe(0);
+  expect(packet.cleanStart()).toBe(true);
+  expect(packet.pwd).toBe(undefined);
+  expect(packet.qualityOfService()).toBe(2);
+  expect(packet.usr).toBe('foo');
+
+  packet.removeUserName();
+  expect(packet.willFlag()).toBe(true);
+  expect(packet.willRetain()).toBe(false);
+  expect(packet.willQos()).toBe(0);
+  expect(packet.cleanStart()).toBe(true);
+  expect(packet.pwd).toBe(undefined);
+  expect(packet.qualityOfService()).toBe(2);
+  expect(packet.usr).toBe(undefined);
+
+  packet.removeWill()
+  expect(packet.willFlag()).toBe(false);
+  expect(packet.willRetain()).toBe(false);
+  expect(packet.willQos()).toBe(0);
+  expect(packet.cleanStart()).toBe(true);
+  expect(packet.pwd).toBe(undefined);
+  expect(packet.qualityOfService()).toBe(2);
+  expect(packet.usr).toBe(undefined);
+
+  packet.setCleanStart(false);
+  expect(packet.willFlag()).toBe(false);
+  expect(packet.willRetain()).toBe(false);
+  expect(packet.willQos()).toBe(0);
+  expect(packet.cleanStart()).toBe(false);
+  expect(packet.pwd).toBe(undefined);
+  expect(packet.qualityOfService()).toBe(2);
+  expect(packet.usr).toBe(undefined);
 });
