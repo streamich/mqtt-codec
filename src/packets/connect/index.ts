@@ -1,7 +1,7 @@
-import {PACKET_TYPE} from '../enums';
-import {Packet, PacketHeaderData} from '../packet';
-import {Properties, QoS} from '../types';
-import {encodeConnect} from './connect/encodeConnect';
+import {PACKET_TYPE} from '../../enums';
+import {Packet, PacketHeaderData} from '../../packet';
+import {Properties, QoS} from '../../types';
+import {encodeConnect} from './encodeConnect';
 
 export interface PacketConnectData extends PacketHeaderData {
   /** Protocol version. */

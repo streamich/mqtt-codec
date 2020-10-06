@@ -1,7 +1,7 @@
-import { PACKET_TYPE } from '../enums';
-import {Packet, PacketHeaderData} from '../packet';
-import {Properties} from '../types';
-import { encodePublish } from './publish/encodePublish/v1';
+import {PACKET_TYPE} from '../../enums';
+import {Packet, PacketHeaderData} from '../../packet';
+import {Properties} from '../../types';
+import {encodePublish} from './encodePublish/v1';
 
 export interface PacketPublishData extends PacketHeaderData {
   /** Topic Name. */

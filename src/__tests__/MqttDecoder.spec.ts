@@ -97,12 +97,12 @@ describe('CONNECT', () => {
   it('can parse CONNECT packet fixed header', () => {
     const decoder = new MqttDecoder();
     decoder.push(connect);
-    const packet = decoder.parse();
-    expect(packet!.l).toBe(connect.byteLength - 2);
-    expect(packet!.type()).toBe(PACKET_TYPE.CONNECT);
-    expect(packet!.dup()).toBe(false);
-    expect(packet!.qos()).toBe(0);
-    expect(packet!.retain()).toBe(false);
+    const packet = decoder.parse()! as PacketConnect;
+    expect(packet.l).toBe(connect.byteLength - 2);
+    expect(packet.type()).toBe(PACKET_TYPE.CONNECT);
+    expect(packet.dup()).toBe(false);
+    expect(packet.qualityOfService()).toBe(0);
+    expect(packet.retain()).toBe(false);
   });
 
   it('parses protocol version', () => {
@@ -843,12 +843,12 @@ describe('CONNACK', () => {
   it('can parse CONNACK packet fixed header', () => {
     const decoder = new MqttDecoder();
     decoder.push(connectAck);
-    const packet = decoder.parse();
+    const packet = decoder.parse()! as PacketConnack;
     expect(packet).toBeInstanceOf(PacketConnack);
     expect(packet!.l).toBe(connectAck.byteLength - 2);
     expect(packet!.type()).toBe(PACKET_TYPE.CONNACK);
     expect(packet!.dup()).toBe(false);
-    expect(packet!.qos()).toBe(0);
+    expect(packet!.qualityOfService()).toBe(0);
     expect(packet!.retain()).toBe(false);
   });
 
