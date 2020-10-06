@@ -3,8 +3,31 @@ import {BufferLike, Properties} from '../../types';
 import {parseBinary, parseVarInt} from '../parse';
 
 export const parseProps = (data: BufferLike, offset: number): [props: Properties, size: number] => {
-  // TODO: inline length parsing
-  const [int, size] = parseVarInt(data, offset);
+  let int: number = 0;
+  let size: number = 0;
+
+  const b1 = data.readUInt8(offset);
+  if (!(b1 & 0b10000000)) {
+    int = b1 & 0b01111111;
+    size = 1;
+  } else {
+    const b2 = data.readUInt8(offset + 1);
+    if (!(b2 & 0b10000000)) {
+      int = ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
+      size = 2;
+    } else {
+      const b3 = data.readUInt8(offset + 2);
+      if (!(b3 & 0b10000000)) {
+        int = ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
+        size = 3;
+      } else {
+        const b4 = data.readUInt8(offset + 3);
+        int = ((b4 & 0b01111111) << 21) + ((b3 & 0b01111111) << 14) + ((b2 & 0b01111111) << 7) + (b1 & 0b01111111);
+        size = 4;
+      }
+    }
+  }
+
   offset += size;
   const end = offset + int;
   const props: Properties = {};

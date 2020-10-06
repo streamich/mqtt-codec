@@ -1,8 +1,9 @@
 import {parseProps as v1} from '../v1';
+import {parseProps as v2} from '../v2';
 import {genProps} from '../../genProps';
 import {allProps} from '../../../__tests__/util';
 
-const versions = [v1];
+const versions = [v1, v2];
 const buf = genProps(allProps);
 
 for (let i = 0; i < versions.length; i++) {

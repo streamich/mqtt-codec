@@ -3,7 +3,7 @@ const {genProps} =  require('../es6/util/genProps');
 
 const versions = {
   v1: require('../es6/util/parseProps/v1').parseProps,
-  // v2: require('../es6/util/parseProps/v2').parseProps,
+  v2: require('../es6/util/parseProps/v2').parseProps,
 };
 
 const suite = new Benchmark.Suite;
