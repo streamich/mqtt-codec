@@ -18,9 +18,9 @@ const props = {
   '8': 'europe/germany/munich/sensors/temperature/room-32/termostats/#', // ResponseTopic
   '9': Buffer.from('xcxcxcxc-xcxc-xcxc-xcxc-xcxcxcxcxcxc', 'utf8'), // CorrelationData
   '38': [ // UserProperty
-    [ 'Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD' ],
-    [ 'Ip-Address', '0.0.0.0' ],
-    [ 'Cache', 'no-cache' ],
+    'Authorization', '=LAIJGORlkJMA9833LK2-LFDl:ADF83-03239234LKFJLDSLSD',
+    'Ip-Address', '0.0.0.0',
+    'Cache', 'no-cache',
   ],
 };
 const buf = genProps(props);
