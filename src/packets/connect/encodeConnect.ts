@@ -2,7 +2,7 @@ import {genProps} from '../../util/genProps/v7';
 import {PacketConnect} from '../connect';
 
 // "MQTT" string with 2 byte length prefix
-const bufferMQTT = Buffer.from([0, 2, 0x4d, 0x51, 0x54, 0x54]);
+const bufferMQTT = Buffer.from([0, 4, 0x4d, 0x51, 0x54, 0x54]);
 
 export const encodeConnect = (packet: PacketConnect): Buffer => {
   const {b, f, id, v, k, p, w, wt, wp, usr, pwd} = packet;
@@ -13,8 +13,8 @@ export const encodeConnect = (packet: PacketConnect): Buffer => {
   const isV5 = v === 5;
   const props = isV5 ? genProps(p) : null;
   const propsLength = props ? props.length : 0;
-  const willProps = isV5 && !!wp ? genProps(wp) : null;
-  const willPropsLength = willProps ? willProps.length : 0;
+  const willProps = (isV5 && hasWill) ? genProps(wp!) : null;
+  const willPropsLength = hasWill ? willProps!.length : 0;
   const willTopicLength: number = hasWill ? Buffer.byteLength(wt!) : 0;
   const willPayloadLength: number = hasWill ? w!.length : 0;
   const lenClientId = Buffer.byteLength(id);
@@ -33,8 +33,8 @@ export const encodeConnect = (packet: PacketConnect): Buffer => {
       2 + willTopicLength +                     // Will topic
       2 + willPayloadLength                     // Will payload
     ) : 0) +
-    (hasUserName ? 2 + userNameLength : 0) +   // Username
-    (hasPassword ? 2 + passwordLength : 0);    // Password
+    (hasUserName ? (2 + userNameLength) : 0) +    // Username
+    (hasPassword ? (2 + passwordLength) : 0);     // Password
 
   packet.l = remainingLength;
   const remainingLengthSize = remainingLength < 128 ? 1 : remainingLength < 16_384 ? 2 : remainingLength < 2_097_152 ? 3 : 4;
@@ -83,6 +83,8 @@ export const encodeConnect = (packet: PacketConnect): Buffer => {
     offset+= propsLength;
   }
 
+  buf.writeUInt16BE(lenClientId, offset);
+  offset += 2;
   buf.write(id, offset);
   offset += lenClientId;
 

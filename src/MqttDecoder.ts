@@ -166,8 +166,9 @@ export class MqttDecoder {
           // const f = (ui32 & 0xFF0000) >> 16;
           // const k = (ui32 & 0xFFFF);
           // offset += 4;
+          const isV5 = v === 5;
           let p: Properties = {};
-          if (v === 5) {
+          if (isV5) {
             const [props, propsSize] = parseProps(buf, offset);
             p = props;
             offset += propsSize;
@@ -175,9 +176,9 @@ export class MqttDecoder {
           const clientId = parseBinary(buf, offset);
           const id = clientId.toString('utf8');
           offset += 2 + clientId.byteLength;
-          const packet = new PacketConnect(b, l, v, f, k, p, id);
+          const packet = new PacketConnect(b, l, v, f, k, p, id)
           if (packet.willFlag()) {
-            if (v === 5) {
+            if (isV5) {
               const [props, propsSize] = parseProps(buf, offset);
               packet.wp = props;
               offset += propsSize;

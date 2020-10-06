@@ -29,19 +29,17 @@ export interface PacketConnectData extends PacketHeaderData {
 export class PacketConnect extends Packet implements PacketConnectData {
   /**
    * @param v Version, i.e. 5 or 4
-   * @param f Connect flags
    * @param k Keep-alive
    * @param p Properties object in case of MQTT 5.0, or empty `{}` object otherwise.
    * @param id Connection ID
    */
   static create(
     v: number,
-    f: number,
     k: number,
     p: Properties,
     id: string,
   ): PacketConnect {
-    return new PacketConnect(PACKET_TYPE.CONNECT << 4, 0, v, f, k, p, id);
+    return new PacketConnect(PACKET_TYPE.CONNECT << 4, 0, v, 0, k, p, id);
   }
 
   public wp?: Properties;
