@@ -1,5 +1,5 @@
 import {PacketPublish} from '../..';
-import {PROPERTY} from '../../../../../es6/enums';
+import {PROPERTY} from '../../../../enums';
 import {MqttDecoder} from '../../../../MqttDecoder';
 import {encodePublish as v1} from '../v1';
 import {encodePublish as v2} from '../v2';

@@ -1,4 +1,4 @@
-import {PROPERTY} from '../../../es6/enums';
+import {PROPERTY} from '../../enums';
 import {PACKET_TYPE} from '../../enums';
 import {PacketConnect} from '../connect';
 import {MqttDecoder} from '../../MqttDecoder';
