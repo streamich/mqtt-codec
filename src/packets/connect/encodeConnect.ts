@@ -1,4 +1,4 @@
-import {genProps} from '../../util/genProps/v7';
+import {genProps} from '../../util/genProps';
 import {PacketConnect} from '../connect';
 
 // "MQTT" string with 2 byte length prefix

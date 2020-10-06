@@ -1,5 +1,5 @@
 import {PacketPubackData} from '.';
-import {genProps} from '../../util/genProps/v7';
+import {genProps} from '../../util/genProps';
 
 export const encodePuback = (packet: PacketPubackData, version: number): Buffer => {
   const {b, i, c, p} = packet;

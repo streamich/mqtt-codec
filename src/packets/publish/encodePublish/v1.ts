@@ -1,4 +1,4 @@
-import {genProps} from '../../../util/genProps/v7';
+import {genProps} from '../../../util/genProps';
 import {PacketPublish} from '../../publish';
 
 export const encodePublish = (packet: PacketPublish, version: number): Buffer => {

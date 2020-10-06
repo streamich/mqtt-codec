@@ -1,5 +1,5 @@
 import {PacketConnack} from '.';
-import {genProps} from '../../util/genProps/v7';
+import {genProps} from '../../util/genProps';
 
 export const encodeConnack = (packet: PacketConnack, version: number): Buffer => {
   const {b, f, c, p} = packet;
