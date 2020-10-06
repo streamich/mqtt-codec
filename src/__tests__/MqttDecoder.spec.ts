@@ -1,6 +1,6 @@
 import {MqttDecoder} from '../MqttDecoder';
 import {connect, connectAck, connectWithClientId, publish3111} from './util';
-import {ERROR, PACKET_TYPE, PROPERTY} from '../enums';
+import {REASON, PACKET_TYPE, PROPERTY} from '../enums';
 import {PacketConnect} from '../packets/connect';
 import {PacketConnack} from '../packets/connack';
 import {PacketPublish} from '../packets/publish';
@@ -28,7 +28,7 @@ it('throws on invalid command', () => {
   try {
     decoder.parse();
   } catch (err) { error = err; }
-  expect(error).toBe(ERROR.MALFORMED_PACKET);
+  expect(error).toBe(REASON.ProtocolError);
 });
 
 it('throws on invalid CONNECT packet', () => {
@@ -43,7 +43,7 @@ it('throws on invalid CONNECT packet', () => {
   try {
     decoder.parse();
   } catch (err) { error = err; }
-  expect(error).toBe(ERROR.MALFORMED_PACKET);
+  expect(error).toBe(REASON.ProtocolError);
 });
 
 it('throws on invalid Protocol ID', () => {
@@ -64,7 +64,7 @@ it('throws on invalid Protocol ID', () => {
   try {
     decoder.parse();
   } catch (err) { error = err; }
-  expect(error).toBe(ERROR.MALFORMED_PACKET);
+  expect(error).toBe(REASON.ProtocolError);
 });
 
 it('throws on unknown property', () => {
@@ -90,7 +90,7 @@ it('throws on unknown property', () => {
   try {
     decoder.parse();
   } catch (err) { error = err; }
-  expect(error).toBe(ERROR.MALFORMED_PACKET);
+  expect(error).toBe(REASON.ProtocolError);
 });
 
 describe('CONNECT', () => {
@@ -688,7 +688,7 @@ describe('CONNECT', () => {
     try {
       decoder.parse();
     } catch (err) { error = err; }
-    expect(error).toBe(ERROR.MALFORMED_PACKET);
+    expect(error).toBe(REASON.ProtocolError);
   });
 
   it('throws on missing Protocol Version', () => {
@@ -702,7 +702,7 @@ describe('CONNECT', () => {
     try {
       decoder.parse();
     } catch (err) { error = err; }
-    expect(error).toBe(ERROR.MALFORMED_PACKET);
+    expect(error).toBe(REASON.ProtocolError);
   });
 
   it('throws on missing Keep-alive', () => {
@@ -718,7 +718,7 @@ describe('CONNECT', () => {
     try {
       decoder.parse();
     } catch (err) { error = err; }
-    expect(error).toBe(ERROR.MALFORMED_PACKET);
+    expect(error).toBe(REASON.ProtocolError);
   });
 
   it('throws on missing Client ID', () => {
@@ -735,7 +735,7 @@ describe('CONNECT', () => {
     try {
       decoder.parse();
     } catch (err) { error = err; }
-    expect(error).toBe(ERROR.MALFORMED_PACKET);
+    expect(error).toBe(REASON.ProtocolError);
   });
 
   it('throws on missing Will Topic', () => {
@@ -754,7 +754,7 @@ describe('CONNECT', () => {
     try {
       decoder.parse();
     } catch (err) { error = err; }
-    expect(error).toBe(ERROR.MALFORMED_PACKET);
+    expect(error).toBe(REASON.ProtocolError);
   });
 
   it('throws on invalid Will Payload', () => {
@@ -775,7 +775,7 @@ describe('CONNECT', () => {
     try {
       decoder.parse();
     } catch (err) { error = err; }
-    expect(error).toBe(ERROR.MALFORMED_PACKET);
+    expect(error).toBe(REASON.ProtocolError);
   });
 
   it('throws on invalid User Name', () => {
@@ -798,7 +798,7 @@ describe('CONNECT', () => {
     try {
       decoder.parse();
     } catch (err) { error = err; }
-    expect(error).toBe(ERROR.MALFORMED_PACKET);
+    expect(error).toBe(REASON.ProtocolError);
   });
 
   it('throws on invalid Password', () => {
@@ -823,7 +823,7 @@ describe('CONNECT', () => {
     try {
       decoder.parse();
     } catch (err) { error = err; }
-    expect(error).toBe(ERROR.MALFORMED_PACKET);
+    expect(error).toBe(REASON.ProtocolError);
   });
 });
 

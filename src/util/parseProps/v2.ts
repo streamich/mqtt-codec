@@ -1,4 +1,4 @@
-import {ERROR, PROPERTY} from '../../enums';
+import {REASON, PROPERTY} from '../../enums';
 import {BufferLike, Properties} from '../../types';
 import {parseBinary, parseVarInt} from '../parse';
 
@@ -96,7 +96,7 @@ export const parseProps = (data: BufferLike, offset: number): [props: Properties
         break;
       }
       default: {
-        throw ERROR.MALFORMED_PACKET;
+        throw REASON.MalformedPacket;
       }
     }
   }

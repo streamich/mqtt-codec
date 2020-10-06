@@ -1,5 +1,5 @@
 import {BufferList} from './BufferList';
-import {ERROR, PACKET_TYPE} from './enums';
+import {REASON, PACKET_TYPE} from './enums';
 import {PacketConnack, parseConnack} from './packets/connack';
 import {PacketConnect} from './packets/connect';
 import {PacketPublish} from './packets/publish';
@@ -217,10 +217,10 @@ export class MqttDecoder {
         case PACKET_TYPE.PINGRESP: return new PacketPingresp(b, l);
         case PACKET_TYPE.DISCONNECT: return parseDisconnect(b, l, buf, this.version);
         case PACKET_TYPE.AUTH: return parseAuth(b, l, buf, this.version);
-        default: throw ERROR.MALFORMED_PACKET;
+        default: throw REASON.MalformedPacket;
       }
     } catch (error) {
-      throw ERROR.MALFORMED_PACKET;
+      throw REASON.ProtocolError;
     }
   }
 }
