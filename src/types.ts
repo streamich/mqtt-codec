@@ -1,4 +1,21 @@
 import {PROPERTY} from './enums';
+import type {
+  PacketAuth,
+  PacketConnack,
+  PacketConnect,
+  PacketDisconnect,
+  PacketPingreq,
+  PacketPingresp,
+  PacketPuback,
+  PacketPubcomp,
+  PacketPublish,
+  PacketPubrec,
+  PacketPubrel,
+  PacketSuback,
+  PacketSubscribe,
+  PacketUnsuback,
+  PacketUnsubscribe
+} from './packets';
 
 export type QoS = 0 | 1 | 2;
 
@@ -40,3 +57,21 @@ export interface BufferLike {
   readUInt32BE(offset: number): number;
   slice(start: number, end: number): Buffer;
 }
+
+export type SomePacket =
+| PacketConnect
+| PacketConnack
+| PacketPublish
+| PacketPuback
+| PacketPubrec
+| PacketPubrel
+| PacketPubcomp
+| PacketSubscribe
+| PacketSuback
+| PacketUnsubscribe
+| PacketUnsuback
+| PacketPingreq
+| PacketPingresp
+| PacketDisconnect
+| PacketAuth
+;

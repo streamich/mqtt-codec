@@ -1,23 +1,23 @@
-import {BufferList} from './BufferList';
-import {REASON, PACKET_TYPE} from './enums';
-import {PacketConnack, parseConnack} from './packets/connack';
-import {PacketConnect} from './packets/connect';
-import {PacketPublish} from './packets/publish';
-import {PacketPuback, parsePuback} from './packets/puback';
-import {PacketPubrec, parsePubrec} from './packets/pubrec';
-import {PacketPubrel, parsePubrel} from './packets/pubrel';
-import {PacketPubcomp, parsePubcomp} from './packets/pubcomp';
-import {PacketSubscribe, parseSubscribe} from './packets/subscribe';
-import {PacketSuback, parseSuback} from './packets/suback';
-import {PacketUnsubscribe, parseUnsubscribe} from './packets/unsubscribe';
-import {PacketUnsuback, parseUnsuback} from './packets/unsuback';
-import {PacketPingreq} from './packets/pingreq';
-import {PacketPingresp} from './packets/pingresp';
-import {PacketDisconnect, parseDisconnect} from './packets/disconnect';
-import {PacketAuth, parseAuth} from './packets/auth';
-import {parseBinary} from './util/parse';
-import {parseProps} from './util/parseProps';
-import {Properties} from './types';
+import {BufferList} from '../BufferList';
+import {REASON, PACKET_TYPE} from '../enums';
+import {parseConnack} from '../packets/connack';
+import {PacketConnect} from '../packets/connect';
+import {PacketPublish} from '../packets/publish';
+import {parsePuback} from '../packets/puback';
+import {parsePubrec} from '../packets/pubrec';
+import {parsePubrel} from '../packets/pubrel';
+import {parsePubcomp} from '../packets/pubcomp';
+import {parseSubscribe} from '../packets/subscribe';
+import {parseSuback} from '../packets/suback';
+import {parseUnsubscribe} from '../packets/unsubscribe';
+import {parseUnsuback} from '../packets/unsuback';
+import {PacketPingreq} from '../packets/pingreq';
+import {PacketPingresp} from '../packets/pingresp';
+import {parseDisconnect} from '../packets/disconnect';
+import {parseAuth} from '../packets/auth';
+import {parseBinary} from '../util/parse';
+import {parseProps} from '../util/parseProps';
+import {Properties, SomePacket} from '../types';
 
 const enum DECODER_STATE {
   HEADER = 0,
@@ -70,23 +70,7 @@ export class MqttDecoder {
    * @returns Returns a single parsed packet. If there is not enough data in
    *          the buffer to parse a packet, returns `undefined`.
    */
-  public parse():
-  | undefined
-  | PacketConnect
-  | PacketConnack
-  | PacketPublish
-  | PacketPuback
-  | PacketPubrec
-  | PacketPubrel
-  | PacketPubcomp
-  | PacketSubscribe
-  | PacketSuback
-  | PacketUnsubscribe
-  | PacketUnsuback
-  | PacketPingreq
-  | PacketPingresp
-  | PacketDisconnect
-  | PacketAuth {
+  public parse(): undefined | SomePacket {
     try {
       const list = this.list;
       if (!list.length) return;
