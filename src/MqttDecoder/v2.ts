@@ -1,8 +1,6 @@
 import {BufferList} from '../BufferList';
 import {REASON, PACKET_TYPE} from '../enums';
 import {parseConnack} from '../packets/connack';
-import {PacketConnect} from '../packets/connect';
-import {PacketPublish} from '../packets/publish';
 import {parsePuback} from '../packets/puback';
 import {parsePubrec} from '../packets/pubrec';
 import {parsePubrel} from '../packets/pubrel';
@@ -15,12 +13,9 @@ import {PacketPingreq} from '../packets/pingreq';
 import {PacketPingresp} from '../packets/pingresp';
 import {parseDisconnect} from '../packets/disconnect';
 import {parseAuth} from '../packets/auth';
-import {parseBinary} from '../util/parse';
-import {parseProps} from '../util/parseProps';
-import {Properties, SomePacket} from '../types';
-import {MqttParser} from '../MqttParser';
-import { decodePublish } from '../packets/publish/decodePublish';
-import { decodeConnect } from '../packets/connect/decodeConnect';
+import {decodePublish} from '../packets/publish/decodePublish';
+import {decodeConnect} from '../packets/connect/decodeConnect';
+import {SomePacket} from '../types';
 
 const enum DECODER_STATE {
   HEADER = 0,

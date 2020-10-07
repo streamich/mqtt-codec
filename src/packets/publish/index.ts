@@ -25,7 +25,7 @@ export class PacketPublish extends Packet implements PacketPublishData {
     t: string,
     i: number,
     p: Properties,
-    d: Buffer,): PacketPublish {
+    d: Buffer): PacketPublish {
     return new PacketPublish(PACKET_TYPE.PUBLISH << 4, 0, t, i, p, d);
   }
 
